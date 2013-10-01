@@ -1,0 +1,7 @@
+# -*- coding: utf-8 -*-
+DEBUG = False
+
+
+#>>> import os
+#>>> os.urandom(24)
+SECRET_KEY = '\x8b\x04~j\xeb\xe2\xa7\t\x8d\xe5R\xe7\xc6[\xce/2\xeb\x814&\x9c\xf2k'
