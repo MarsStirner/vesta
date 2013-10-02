@@ -35,7 +35,7 @@ class VestaLogger(object):
         return False
 
     @classmethod
-    def __log_except(cls, logger):
+    def __log_except(cls, vesta_logger):
         #TODO: Нужно ли?! не будет ли зацикливания?
         if not DEBUG:
             # write to log all unhandled exceptions if not DEBUG mode
@@ -44,20 +44,20 @@ class VestaLogger(object):
 
             def log_except_hook(*exc_info):
                 text = "".join(traceback.format_exception(*exc_info))
-                logger.error("Unhandled exception: %s", text)
+                vesta_logger.error("Unhandled exception: %s", text)
 
             sys.excepthook = log_except_hook
 
     @classmethod
     def get_logger(cls):
-        logger = logging.getLogger(MODULE_NAME)
-        logger.setLevel(logging.DEBUG)
+        vesta_logger = logging.getLogger(MODULE_NAME)
+        vesta_logger.setLevel(logging.DEBUG)
 
         if cls.__check_url(SIMPLELOGS_URL):
             # create handler
             handler = SimplelogHandler(SIMPLELOGS_URL)
             # create formatter
-            formatter = logging.Formatter('%(asctime)s  - %(levelname)s - %(message)s')
+            formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
         else:
             # create handler and set level to debug
             handler = logging.StreamHandler()
@@ -69,6 +69,10 @@ class VestaLogger(object):
         # add formatter to handler
         handler.setFormatter(formatter)
 
-        cls.__log_except(logger)
+        vesta_logger.addHandler(handler)
 
-        return logger
+        cls.__log_except(vesta_logger)
+
+        return vesta_logger
+
+logger = VestaLogger.get_logger()
