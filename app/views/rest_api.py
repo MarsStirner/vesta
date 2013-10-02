@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from flask.views import MethodView
-from flask import jsonify, abort, g, make_response
+from flask import jsonify, g, make_response
 from app import app
 from utils.logs.exceptions import InvalidAPIUsage
-from ..lib.data import Collections, Clients, DictionaryNames, Dictionary
+from ..lib.data import Clients, DictionaryNames, Dictionary
 
 
 def user_required(f):
@@ -17,6 +17,7 @@ def user_required(f):
 
 class ClientsAPI(MethodView):
     """API для работы с информацией о зарегистрированных клиентах (внешних системах)"""
+    decorators = [user_required]
 
     def get(self, code):
         """Получение списка клиентов или информации по конкретному клиенту"""
