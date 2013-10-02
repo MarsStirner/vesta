@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
-DEBUG = False
+DEBUG = True
+
+MONGODB_HOST = '127.0.0.1'
+MONGODB_PORT = 27017
+MONGODB_USER = ''
+MONGODB_PASSWORD = ''
+MONGODB_DB = 'vesta'
+
+SIMPLELOGS_URL = 'http://127.0.0.1:8080'
 
 
 #>>> import os
