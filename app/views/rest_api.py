@@ -37,13 +37,13 @@ class ClientsAPI(MethodView):
         """Заведение информации о клиенте"""
         obj = DictionaryNames()
         try:
-            obj.add(data)
+            result = obj.add(data)
         except TypeError, e:
             raise InvalidAPIUsage(e.message, status_code=400)
         except AttributeError, e:
             raise InvalidAPIUsage(e.message, status_code=400)
         else:
-            return make_response(201)
+            return make_response(jsonify(result), 201)
 
     def put(self, code, data):
         """Обновление информации о клиенте"""
@@ -85,7 +85,7 @@ class ClientsAPI(MethodView):
         mod.add_url_rule('{0}<regex("[\w]*[Ss]"):code>'.format(url), view_func=f, methods=['GET', 'PUT', 'DELETE'])
 
 
-class CollectionAPI(MethodView):
+class DictionaryNamesAPI(MethodView):
     """API для работы с информацией о справочниках"""
     decorators = [user_required]
 
@@ -107,13 +107,13 @@ class CollectionAPI(MethodView):
         """Заведение информации о справочнике"""
         obj = DictionaryNames()
         try:
-            obj.add(data)
+            result = obj.add(data)
         except TypeError, e:
             raise InvalidAPIUsage(e.message, status_code=400)
         except AttributeError, e:
             raise InvalidAPIUsage(e.message, status_code=400)
         else:
-            return make_response(201)
+            return make_response(jsonify(result), 201)
 
     def put(self, code, data):
         """Обновление информации о справочнике"""
@@ -175,13 +175,13 @@ class DictionaryAPI(MethodView):
     def post(self, code, data):
         obj = Dictionary(code)
         try:
-            obj.add_documents(data)
+            result = obj.add_documents(data)
         except TypeError, e:
             raise InvalidAPIUsage(e.message, status_code=400)
         except AttributeError, e:
             raise InvalidAPIUsage(e.message, status_code=400)
         else:
-            return make_response(201)
+            return make_response(jsonify(result), 201)
 
     def document_details(self, code, document_id):
         obj = Dictionary(code)
@@ -200,13 +200,13 @@ class DictionaryAPI(MethodView):
             raise InvalidAPIUsage(e.message, status_code=400)
         try:
             data.update(dict(_id=document_id))
-            obj.add_document(data)
+            result = obj.add_document(data)
         except TypeError, e:
             raise InvalidAPIUsage(e.message, status_code=400)
         except AttributeError, e:
             raise InvalidAPIUsage(e.message, status_code=400)
         if not exists:
-            return make_response(201)
+            return make_response(jsonify(result), 201)
         return make_response(200)
 
     def delete(self, code, document_id):
@@ -227,5 +227,6 @@ class DictionaryAPI(MethodView):
         mod.add_url_rule(url, view_func=f, methods=['POST'])
         mod.add_url_rule('{0}<int:document_id>'.format(url), view_func=f, methods=['GET', 'PUT', 'DELETE'])
 
-CollectionAPI.register(app)
+ClientsAPI.register(app)
+DictionaryNamesAPI.register(app)
 DictionaryAPI.register(app)
