@@ -1,24 +1,26 @@
 # -*- encoding: utf-8 -*-
 import logging
-from ..connectors import db_local_client
+from ..connectors import MongoConnection
 from pymongo.errors import *
 from config import MODULE_NAME
 from app.app import app
 
 logger = logging.getLogger(MODULE_NAME)
 
-db_local = db_local_client[app.config['MONGODB_DB']]
-
 
 class Collections(object):
 
+    def __init__(self):
+        self.db_client, self.db = MongoConnection.provider(app.config['MONGODB_DB'])
+
     def get_list(self):
-        return db_local.collection_names()
+        return self.db.collection_names()
 
 
 class Clients(object):
 
     def __init__(self):
+        self.db_client, self.db = MongoConnection.provider(app.config['MONGODB_DB'])
         self.code = 'clients'
         self.dictionary = Dictionary(self.code)
 
@@ -54,6 +56,7 @@ class Clients(object):
 class DictionaryNames(object):
 
     def __init__(self):
+        self.db_client, self.db = MongoConnection.provider(app.config['MONGODB_DB'])
         self.code = 'dict_names'
         self.dictionary = Dictionary(self.code)
 
@@ -91,8 +94,8 @@ class DictionaryNames(object):
         return result
 
     def delete(self, code):
-        db_local.drop_collection(code)
-        db_error = db_local.error()
+        self.db.drop_collection(code)
+        db_error = self.db.error()
         if db_error is not None:
             error = u'Возникла ошибка при удалении справочника {1} ({1})'.format(code, db_error)
             logger.error(error)
@@ -109,8 +112,9 @@ class DictionaryNames(object):
 class Dictionary(object):
 
     def __init__(self, code):
+        self.db_client, self.db = MongoConnection.provider(app.config['MONGODB_DB'])
         self.code = code
-        self.collection = db_local[code]
+        self.collection = self.db[code]
 
     def __add_dictionary_name(self, code):
         obj = DictionaryNames()
