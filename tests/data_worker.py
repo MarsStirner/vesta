@@ -2,11 +2,12 @@
 from datetime import datetime
 import unittest
 from app.app import app
-from app.connectors import db_local_client
+from app.connectors import MongoConnection
 from config import MONGODB_DB
 from app.lib.data import Clients, DictionaryNames, Dictionary
 
 TEST_DB = '{0}_test'.format(MONGODB_DB)
+db_client, db = MongoConnection.provider(TEST_DB)
 
 
 class DictionaryNamesTestCase(unittest.TestCase):
@@ -18,11 +19,12 @@ class DictionaryNamesTestCase(unittest.TestCase):
         self.obj = DictionaryNames()
 
     def tearDown(self):
-        db_local_client.drop_database(TEST_DB)
+        db.drop_collection(self.obj.code)
 
     def test_get_list(self):
         result = self.obj.get_list()
-        self.assertIsNone(result)
+        self.assertEqual(result.count(), 0)
+        self.assertEqual(list(result), list())
 
     def test_add(self):
         data = dict(code='test', name=u'Тестовый справочник')
@@ -40,6 +42,8 @@ class DictionaryNamesTestCase(unittest.TestCase):
         self.obj.update(_id, update_data)
         result = self.obj.get_by_id(_id)
         update_data.update(dict(_id=_id))
+        result.pop('updated')
+        update_data.pop('updated')
         self.assertDictEqual(result, update_data)
 
     def test_delete(self):
@@ -60,6 +64,8 @@ class DictionaryNamesTestCase(unittest.TestCase):
         self.obj.update_by_code(code, update_data)
         result = self.obj.get_by_code(code)
         update_data.update(dict(_id=_id))
+        result.pop('updated')
+        update_data.pop('updated')
         self.assertDictEqual(result, update_data)
 
 
@@ -72,11 +78,11 @@ class ClientsTestCase(unittest.TestCase):
         self.obj = Clients()
 
     def tearDown(self):
-        db_local_client.drop_database(TEST_DB)
+        db.drop_collection(self.obj.code)
 
     def test_get_list(self):
         result = self.obj.get_list()
-        self.assertIsNone(result)
+        self.assertEqual(result.count(), 0)
 
     def test_add(self):
         data = dict(code='test', name=u'Тестовый клиент')
@@ -94,6 +100,8 @@ class ClientsTestCase(unittest.TestCase):
         self.obj.update(_id, update_data)
         result = self.obj.get_by_id(_id)
         update_data.update(dict(_id=_id))
+        result.pop('updated')
+        update_data.pop('updated')
         self.assertDictEqual(result, update_data)
 
     def test_delete(self):
@@ -115,14 +123,16 @@ class DictionaryTestCase(unittest.TestCase):
         self.obj = Dictionary(self.collection)
 
     def drop_collection(self):
-        db_local_client.drop_collection(self.collection)
+        db.drop_collection(self.collection)
 
     def tearDown(self):
-        db_local_client.drop_database(TEST_DB)
+        db.drop_collection(self.collection)
 
     def test_get_list_empty(self):
+        self.drop_collection()
         result = self.obj.get_list()
-        self.assertIsNone(result)
+        self.assertRaises(ValueError)
+        #self.assertEqual(result.count(), 0)
 
     def test_add_document(self):
         data = dict(code='test', name=u'Тестовый документ')
@@ -141,11 +151,11 @@ class DictionaryTestCase(unittest.TestCase):
         _ids = self.obj.add_documents(data)
         self.assertIsNotNone(_ids)
         self.assertIsInstance(_ids, list)
-        result = self.obj.get_list()
+        result = list(self.obj.get_list())
         self.assertEqual(len(result), len(data))
         self.assertEqual(result[0]['code'], data[0]['code'])
         data_2 = data[2]
-        data_2.update(dict('_id', _ids[2]))
+        data_2.update(dict(_id=_ids[2]))
         self.assertEqual(result[2], data_2)
 
     def test_get_document(self):

@@ -29,9 +29,9 @@ class VestaLogger(object):
             if urllib2.urlopen(url, timeout=2).getcode() == 200:
                 return True
         except urllib2.URLError, e:
-            print e
+            print u'Проблема с подключением к системе журналирования ({0})'.format(e)
         except socket.timeout, e:
-            print e
+            print u'Проблема с подключением к системе журналирования ({0})'.format(e)
         return False
 
     @classmethod
