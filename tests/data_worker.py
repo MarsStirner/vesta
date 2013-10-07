@@ -22,9 +22,10 @@ class DictionaryNamesTestCase(unittest.TestCase):
         db.drop_collection(self.obj.code)
 
     def test_get_list(self):
-        result = self.obj.get_list()
-        self.assertEqual(result.count(), 0)
-        self.assertEqual(list(result), list())
+        with self.assertRaises(ValueError):
+            result = self.obj.get_list()
+        #self.assertEqual(result.count(), 0)
+        #self.assertEqual(list(result), list())
 
     def test_add(self):
         data = dict(code='test', name=u'Тестовый справочник')
@@ -81,8 +82,9 @@ class ClientsTestCase(unittest.TestCase):
         db.drop_collection(self.obj.code)
 
     def test_get_list(self):
-        result = self.obj.get_list()
-        self.assertEqual(result.count(), 0)
+        with self.assertRaises(ValueError):
+            result = self.obj.get_list()
+        #self.assertEqual(result.count(), 0)
 
     def test_add(self):
         data = dict(code='test', name=u'Тестовый клиент')
@@ -130,8 +132,8 @@ class DictionaryTestCase(unittest.TestCase):
 
     def test_get_list_empty(self):
         self.drop_collection()
-        result = self.obj.get_list()
-        self.assertRaises(ValueError)
+        with self.assertRaises(ValueError):
+            result = self.obj.get_list()
         #self.assertEqual(result.count(), 0)
 
     def test_add_document(self):
