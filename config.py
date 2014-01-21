@@ -17,6 +17,8 @@ MONGODB_PASSWORD = 'vesta_pwd'
 MONGODB_DB = 'vesta'
 
 SIMPLELOGS_URL = 'http://127.0.0.1:8080'
+NSI_SOAP = 'http://nsi.rosminzdrav.ru/wsdl/service.v2.wsdl'
+NSI_TOKEN = ''
 
 try:
     from config_local import *
