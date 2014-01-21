@@ -4,7 +4,7 @@ import unittest
 from app.app import app
 from app.connectors import MongoConnection
 from config import MONGODB_DB, SERVER_HOST, SERVER_PORT
-from utils.tools import json
+from app.lib.utils.tools import json
 
 
 TEST_DB = '{0}_test'.format(MONGODB_DB)

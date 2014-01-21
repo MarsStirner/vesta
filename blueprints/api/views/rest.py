@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 from flask.views import MethodView
 from flask import g, make_response, abort, request
-from app.app import app
-from utils.logs.exceptions import InvalidAPIUsage
-from ..lib.data import Clients, DictionaryNames, Dictionary
-from utils.tools import jsonify as vesta_jsonify, json
+from app.lib.utils.exceptions import InvalidAPIUsage
+from app.lib.data import Clients, DictionaryNames, Dictionary
+from app.lib.utils.tools import jsonify as vesta_jsonify, json
 from bson.objectid import ObjectId, InvalidId
 
 
@@ -268,7 +267,3 @@ class DictionaryAPI(MethodView, APIMixin):
         mod.add_url_rule(url, view_func=f, methods=['GET'], defaults={'document_id': None})
         mod.add_url_rule(url, view_func=f, methods=['POST'])
         mod.add_url_rule('{0}<string:document_id>/'.format(url), view_func=f, methods=['GET', 'PUT', 'DELETE'])
-
-ClientsAPI.register(app)
-DictionaryNamesAPI.register(app)
-DictionaryAPI.register(app)
