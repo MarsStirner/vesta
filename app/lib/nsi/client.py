@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from config import NSI_SOAP, NSI_TOKEN, DEBUG
+from config import DEBUG
 from suds.client import Client
 from suds import WebFault
 from app.lib.utils.tools import logger
@@ -7,12 +7,12 @@ from app.lib.utils.tools import logger
 
 class NSI_Client:
     """Класс SOAP-клиента для взаимодействия со сервисом НСИ"""
-    def __init__(self):
-        self.user_key = NSI_TOKEN
+    def __init__(self, url, user_key):
+        self.user_key = user_key
         if DEBUG:
-            self.client = Client(NSI_SOAP, cache=None)
+            self.client = Client(url, cache=None)
         else:
-            self.client = Client(NSI_SOAP)
+            self.client = Client(url)
 
     def getRefbook(self, code, version):
         try:
