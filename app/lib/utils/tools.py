@@ -2,6 +2,9 @@
 import datetime
 from bson.objectid import ObjectId
 from flask import Response
+from pysimplelogs.logger import SimpleLogger
+from config import SIMPLELOGS_URL, DEBUG, MODULE_NAME
+from version import version
 
 try:
     import json
@@ -25,3 +28,8 @@ def jsonify(*args, **kwargs):
     """ jsonify with support for MongoDB ObjectId
     """
     return Response(json.dumps(dict(*args, **kwargs), cls=MongoJsonEncoder), mimetype='application/json')
+
+logger = SimpleLogger.get_logger(SIMPLELOGS_URL,
+                                 MODULE_NAME,
+                                 dict(name=MODULE_NAME, version=version),
+                                 DEBUG)

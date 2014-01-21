@@ -1,11 +1,9 @@
 # -*- encoding: utf-8 -*-
-import logging
 from ..connectors import MongoConnection
 from pymongo.errors import *
 from config import MODULE_NAME
 from app.app import app
-
-logger = logging.getLogger(MODULE_NAME)
+from app.lib.utils.tools import logger
 
 
 class Collections(object):
