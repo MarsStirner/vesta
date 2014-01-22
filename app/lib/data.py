@@ -147,7 +147,7 @@ class Dictionary(object):
                     #TODO: use SONManipulator for ids in different clients?
                     self.collection.update({'_id': _id}, {'$set': data})
                 except TypeError, e:
-                    error = u'Некорректные входные параметры ({0})'.format(e)
+                    error = u'Некорректные входные параметры ({0}): {1}'.format(e, data)
                     logger.error(error)
                     raise TypeError(error)
                 else:
@@ -155,7 +155,7 @@ class Dictionary(object):
             else:
                 result = self.collection.insert(data)
         else:
-            error = u'Некорректные входные параметры'
+            error = u'Некорректные входные параметры: {0}'.format(data)
             logger.error(error)
             raise AttributeError(error)
         return result
