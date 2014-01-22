@@ -3,6 +3,7 @@ from config import DEBUG
 from suds.client import Client
 from suds import WebFault
 from app.lib.utils.tools import logger
+from exc import *
 
 
 class NSI_Client:
@@ -14,52 +15,86 @@ class NSI_Client:
         else:
             self.client = Client(url)
 
+    def __get_error(self, result):
+        # TODO: отрефакторить и вынести в NSIResult.get_errors, соответственно создать класс-обертку для результатов
+        try:
+            first = result[0]
+        except IndexError, e:
+            pass
+        else:
+            if first.key == 'errors':
+                errors = dict()
+                children = getattr(first, 'children', None)
+                if children:
+                    for child in getattr(children, 'item', []):
+                        errors[child.key] = child.value
+                    return errors
+        return None
+
+    def get_refbook_data(self, code, version):
+        result = self.getRefbook(code, version)
+        errors = self.__get_error(result)
+        if errors and RefbookTooLargeError.code in errors:
+            # Получаем количество частей и выкачиваем справочник по частям
+            parts = self.getRefbookParts(code, version)
+            parts_number = int(parts[0].value)
+            if parts_number:
+                result = list()
+                for i in xrange(1, parts_number + 1):
+                    part_data = self.getRefbookPartial(code, version, i)
+                    result.append(part_data)
+        return result
+
     def getRefbook(self, code, version):
         try:
-            result = self.client.service.getRefbook(userKey=self.user_key, refbookCode=code, version=version)
+            result = self.client.service.getRefbook(userKey=self.user_key,
+                                                    refbookCode=str(code),
+                                                    version=str(version))
         except WebFault, e:
             print e
             logger.error(e, extra=dict(tags=['getRefbook', 'nsi']))
         else:
-            return result
+            return getattr(result, 'item', [])
         return None
 
     def getRefbookList(self):
         try:
-            result = self.client.service.getRefbookList(userKey=self.user_key)
+            result = self.client.service.getRefbookList(userKey1=self.user_key)
         except WebFault, e:
             print e
             logger.error(e, extra=dict(tags=['getRefbookList', 'nsi']))
         else:
-            return result
+            return getattr(result, 'item', [])
         return None
 
     def getRefbookPartial(self, code, version, part_number):
         try:
-            result = self.client.service.getRefbookPartial(userKey=self.user_key,
-                                                           refbookCode=code,
-                                                           version=version,
+            result = self.client.service.getRefbookPartial(userKey2=self.user_key,
+                                                           refbookCode1=code,
+                                                           version1=version,
                                                            partNumber=part_number)
         except WebFault, e:
             print e
             logger.error(e, extra=dict(tags=['getRefbookPartial', 'nsi']))
         else:
-            return result
+            return getattr(result, 'item', [])
         return None
 
     def getRefbookParts(self, code, version):
         try:
-            result = self.client.service.getRefbookParts(userKey=self.user_key, refbookCode=code, version=version)
+            result = self.client.service.getRefbookParts(userKey3=self.user_key,
+                                                         refbookCode2=code,
+                                                         version2=version)
         except WebFault, e:
             print e
             logger.error(e, extra=dict(tags=['getRefbookParts', 'nsi']))
         else:
-            return result
+            return getattr(result, 'item', [])
         return None
 
     def getRefbookUpdate(self, code, user_version=None, new_version=None):
         try:
-            parameters = dict(userKey=self.user_key, refbookCode=code)
+            parameters = dict(userKey4=self.user_key, refbookCode3=code)
             if user_version is not None:
                 parameters['userVersion'] = user_version
             if new_version is not None:
@@ -69,7 +104,7 @@ class NSI_Client:
             print e
             logger.error(e, extra=dict(tags=['getRefbookUpdate', 'nsi']))
         else:
-            return result
+            return getattr(result, 'item', [])
         return None
 
     def getServerTime(self):
@@ -84,10 +119,10 @@ class NSI_Client:
 
     def getVersionList(self, code):
         try:
-            result = self.client.service.getVersionList(userKey=self.user_key, refbookCode=code)
+            result = self.client.service.getVersionList(userKey5=self.user_key, refbookCode4=code)
         except WebFault, e:
             print e
             logger.error(e, extra=dict(tags=['getVersionList', 'nsi']))
         else:
-            return result
+            return getattr(result, 'item', [])
         return None

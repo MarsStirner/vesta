@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime, date
 from config import NSI_SOAP, NSI_TOKEN
 from client import NSI_Client
-from ..data import *
+from ..data import DictionaryNames, Dictionary
+from app.lib.utils.tools import logger
 
 
 class NSI_Data:
@@ -15,7 +17,7 @@ class NSI_Data:
         return result
 
     def __get_dictionary(self, code, version):
-        result = self.client.getRefbook(code, version)
+        result = self.client.get_refbook_data(code, version)
         return result
 
     def __get_local_dictionary(self, code):
@@ -25,6 +27,16 @@ class NSI_Data:
     def __get_dictionary_versions(self, code):
         result = self.client.getVersionList(code)
         return result
+
+    def __prepare_dictionary(self, data):
+        dictionary = dict()
+        children = getattr(data, 'children', None)
+        if children:
+            for field in getattr(children, 'item', []):
+                _key = field.key.lower()
+                _key = _key.replace('s_', '').replace('v_', '')
+                dictionary[_key] = field.value
+        return dictionary
 
     def __get_data(self, dictionary):
         obj = DictionaryNames()
@@ -38,26 +50,26 @@ class NSI_Data:
                     self.msg.append(u'Локальная версия справочника: {0}'.format(local_version))
                     self.msg.append(u'Актуальная версия справочника: {0}'.format(dictionary['version']))
                     self.msg.append(u'Версии не совпадают, обновляем diff')
-                    data = self.client.getRefbookUpdate(code=dictionary['code'], user_version=local_version)
+                    data = self.client.getRefbookUpdate(code=dictionary['code'], user_version=local_version['version'])
             else:
                 version = dictionary.pop('version')
                 self.msg.append(u'Локальная версия справочника не задана, импортируем данные')
                 obj.update(_id=local_dictionary['_id'], data=dictionary)
-                data = self.client.getRefbook(dictionary['code'], version)
+                data = self.__get_dictionary(dictionary['code'], version['version'])
         else:
             version = dictionary.pop('version')
             self.msg.append(u'Локальный справочник не существует, импортируем данные')
-            obj.update(_id=local_dictionary['_id'], data=dictionary)
             _id = obj.add(dictionary)
-            data = self.client.getRefbook(dictionary['code'], version)
+            data = self.__get_dictionary(dictionary['code'], version['version'])
         return data
 
     def __add_data(self, code, data):
         obj = Dictionary(code)
-        for document in data:
-            exists_document = obj.get_document(dict(code=document['code']))
-            if exists_document:
-                document.update(dict(_id=exists_document['_id']))
+        for document_data in data:
+            document = self.__prepare_dictionary(document_data)
+            existdocument = obj.get_document(dict(code=document['code']))
+            if existdocument:
+                document.update(dict(_id=existdocument['_id']))
             self.msg.append(u'Добавляем документ {0}'.format(document))
             try:
                 result = obj.add_document(document)
@@ -68,17 +80,38 @@ class NSI_Data:
                 self.msg.append(u'{0}'.format(result))
         return True
 
+    def __get_latest_version(self, dictionary):
+        nsi_dict_versions = self.__get_dictionary_versions(dictionary['code'])
+        _versions = list()
+        for version in nsi_dict_versions:
+            _versions.append(self.__prepare_dictionary(version))
+        try:
+            latest_version = _versions[0]
+        except IndexError, e:
+            self.msg.append(e)
+            latest_version = None
+        else:
+            try:
+                latest_version['date'] = datetime.strptime(latest_version['date'], '%d.%m.%Y').date()
+            except ValueError, e:
+                self.msg.append(e)
+        return latest_version
+
     def __update_version(self, dictionary):
         obj = DictionaryNames()
         obj.update_by_code(dictionary['code'], dict(version=dictionary['version']))
         self.msg.append(u'Обновляем версию справочника ({0}): {1}'.format(dictionary['code'], dictionary['version']))
 
-    def import_nsi_dictionaries(self):
-        # TODO: add logging
+    def import_nsi_dictionaries(self, exclude=None):
         nsi_dicts = self.__get_dictionaries()
         if nsi_dicts:
-            for nsi_dict in nsi_dicts:
+            for dict_data in nsi_dicts:
+                nsi_dict = self.__prepare_dictionary(dict_data)
+                if isinstance(exclude, list) and nsi_dict['code'] in exclude:
+                    continue
                 self.msg = list()
+                latest_version = self.__get_latest_version(nsi_dict)
+                nsi_dict.update(dict(version=latest_version))
                 data = self.__get_data(nsi_dict)
                 if data:
                     result = self.__add_data(nsi_dict['code'], data)

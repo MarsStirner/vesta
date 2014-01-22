@@ -2,14 +2,14 @@
 from ..connectors import MongoConnection
 from pymongo.errors import *
 from config import MODULE_NAME
-from app.app import app
+from config import MONGODB_DB
 from app.lib.utils.tools import logger
 
 
 class Collections(object):
 
     def __init__(self):
-        self.db_client, self.db = MongoConnection.provider(app.config['MONGODB_DB'])
+        self.db_client, self.db = MongoConnection.provider(MONGODB_DB)
 
     def get_list(self):
         return self.db.collection_names()
@@ -18,7 +18,7 @@ class Collections(object):
 class Clients(object):
 
     def __init__(self):
-        self.db_client, self.db = MongoConnection.provider(app.config['MONGODB_DB'])
+        self.db_client, self.db = MongoConnection.provider(MONGODB_DB)
         self.code = 'clients'
         self.dictionary = Dictionary(self.code)
 
@@ -55,7 +55,7 @@ class Clients(object):
 class DictionaryNames(object):
 
     def __init__(self):
-        self.db_client, self.db = MongoConnection.provider(app.config['MONGODB_DB'])
+        self.db_client, self.db = MongoConnection.provider(MONGODB_DB)
         self.code = 'dict_names'
         self.dictionary = Dictionary(self.code)
 
@@ -113,7 +113,7 @@ class DictionaryNames(object):
 class Dictionary(object):
 
     def __init__(self, code):
-        self.db_client, self.db = MongoConnection.provider(app.config['MONGODB_DB'])
+        self.db_client, self.db = MongoConnection.provider(MONGODB_DB)
         self.code = code
         self.collection = self.db[code]
         self._dict_name_exists = None
