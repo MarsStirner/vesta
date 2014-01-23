@@ -3,3 +3,5 @@ PyMongo
 requests
 simplejson
 suds
+sqlalchemy
+mysql-python

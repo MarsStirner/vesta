@@ -94,6 +94,7 @@ class NSI_Data:
                 return False
             # else:
             #     self.msg.append(u'{0}'.format(result))
+        self.msg.append(u'Справочник ({0}) обновлён'.format(code))
         return True
 
     def __get_latest_version(self, dictionary):
