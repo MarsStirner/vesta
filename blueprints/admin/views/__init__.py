@@ -1,1 +1,1 @@
-__author__ = 'santipov'
+__all__ = ['admin']

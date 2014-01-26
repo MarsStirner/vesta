@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from ..connectors import MongoConnection
 from pymongo.errors import *
+from bson.objectid import ObjectId, InvalidId
 from config import MODULE_NAME
 from config import MONGODB_DB
 from app.lib.utils.tools import logger
@@ -140,9 +141,9 @@ class Dictionary(object):
             # Добавляем запись о справочнике в коллекцию dict_names
             if not self.dict_name_exists:
                 self.__add_dictionary_name(self.code)
-
             _id = data.pop('_id', None)
             if _id is not None:
+                _id = ObjectId(_id)
                 try:
                     #TODO: use SONManipulator for ids in different clients?
                     self.collection.update({'_id': _id}, {'$set': data})
@@ -170,6 +171,8 @@ class Dictionary(object):
         return result
 
     def get_document(self, find):
+        if '_id' in find:
+            find['_id'] = ObjectId(find['_id'])
         try:
             result = self.collection.find_one(find)
         except TypeError, e:
@@ -197,6 +200,8 @@ class Dictionary(object):
     def exists(self, find=None):
         try:
             if find is not None:
+                if '_id' in find:
+                    find['_id'] = ObjectId(find['_id'])
                 result = self.collection.find(find).count()
             else:
                 result = self.collection.find().count()
@@ -222,7 +227,7 @@ class Dictionary(object):
         if not _id:
             return False
         try:
-            self.collection.remove(_id)
+            self.collection.remove(ObjectId(_id))
         except TypeError, e:
             error = u'Неверный тип параметров ({0})'.format(e)
             logger.error(error)

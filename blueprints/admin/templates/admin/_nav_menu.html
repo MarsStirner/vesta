@@ -1,0 +1,11 @@
+<div class="application_menu">
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <ul class="nav">
+            <li{% if request.path == url_for('.index') %} class="active"{% endif %}><a href="{{ url_for('.index') }}" id="index">Главная</a></li>
+          </ul>
+        </div>
+      </div>
+  </div>
+</div><!-- /.navbar -->

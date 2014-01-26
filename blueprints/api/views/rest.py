@@ -4,7 +4,7 @@ from flask import g, make_response, abort, request
 from app.lib.utils.exceptions import InvalidAPIUsage
 from app.lib.data import Clients, DictionaryNames, Dictionary
 from app.lib.utils.tools import jsonify as vesta_jsonify, json
-from bson.objectid import ObjectId, InvalidId
+from bson.objectid import InvalidId
 
 
 def user_required(f):
@@ -225,7 +225,7 @@ class DictionaryAPI(MethodView, APIMixin):
         obj = Dictionary(code)
         #TODO: учесть auth_token
         try:
-            result = obj.get_document(dict(_id=ObjectId(document_id)))
+            result = obj.get_document(dict(_id=document_id))
         except TypeError, e:
             raise InvalidAPIUsage(e.message, status_code=400)
         except InvalidId, e:
@@ -236,11 +236,11 @@ class DictionaryAPI(MethodView, APIMixin):
         data = self.parse_request(request)
         obj = Dictionary(code)
         try:
-            exists = obj.exists(dict(_id=ObjectId(document_id)))
+            exists = obj.exists(dict(_id=document_id))
         except TypeError, e:
             raise InvalidAPIUsage(e.message, status_code=400)
         try:
-            data.update(dict(_id=ObjectId(document_id)))
+            data.update(dict(_id=document_id))
             result = obj.add_document(data)
         except TypeError, e:
             raise InvalidAPIUsage(e.message, status_code=400)
@@ -253,7 +253,7 @@ class DictionaryAPI(MethodView, APIMixin):
     def delete(self, code, document_id):
         obj = Dictionary(code)
         try:
-            obj.delete(_id=ObjectId(document_id))
+            obj.delete(_id=document_id)
         except TypeError, e:
             raise InvalidAPIUsage(e.message, status_code=400)
         except RuntimeError, e:

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    {% include 'admin/_header.html' %}
+    {% block modules_css %}{% endblock %}
+  </head>
+  <body>
+  <div id="wrap">
+
+  {% include 'admin/_top.html' %}
+
+  <div id="container" class="container">
+
+    {% block content %}
+
+      <!-- Jumbotron -->
+      <div class="jumbotron">
+        <h1>Управление справочниками</h1>
+        <p class="lead">Добро пожаловать в систему администрирования ЛПУ. Модули, доступные для работы представлены в главном меню.</p>
+      </div>
+
+    {% endblock %}
+
+   </div> <!-- /container -->
+   <div id="push"></div>
+  </div>
+
+  {% include 'admin/_bottom.html' %}
+  {% include 'admin/_footer.html' %}
+  {% block modules_js %}{% endblock %}
+
+  </body>
+</html>

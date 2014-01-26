@@ -1,0 +1,8 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+  <legend><h2>{%- if info['name'] -%}{{ info['name'] }} ({{ info['code'] }}){%- else -%}{{ info['code'] }}{%- endif -%}</h2></legend>
+  {% if data %}
+
+  {% endif %}
+{% endblock %}
