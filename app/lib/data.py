@@ -60,8 +60,8 @@ class DictionaryNames(object):
         self.code = 'dict_names'
         self.dictionary = Dictionary(self.code)
 
-    def get_list(self):
-        return self.dictionary.get_list()
+    def get_list(self, find=None, sort=None):
+        return self.dictionary.get_list(find=find, sort=sort)
 
     def get_by_code(self, code):
         return self.dictionary.get_document(dict(code=code))
@@ -181,7 +181,7 @@ class Dictionary(object):
             raise TypeError(error)
         return result
 
-    def get_list(self, find=None):
+    def get_list(self, find=None, sort=None, limit=None):
         if not self.collection.name in self.db.collection_names():
             error = u'Коллекция не существует ({0})'.format(self.collection.name)
             logger.error(error)
@@ -195,6 +195,10 @@ class Dictionary(object):
                 raise TypeError(error)
         else:
             cursor = self.collection.find()
+        if limit:
+            cursor = cursor.limit(limit)
+        if sort:
+            cursor = cursor.sort(sort)
         return cursor
 
     def exists(self, find=None):

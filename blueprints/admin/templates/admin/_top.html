@@ -4,7 +4,7 @@
         <ul class="nav" id="cur_modules">
           <li>
               <div class="btn-group">
-                <a class="btn btn-small btn-inverse" href="/" title="Главная страница"><i class="icon-home icon-white"></i></a>
+                <a class="btn btn-small btn-inverse" href="{{ url_for('.index') }}" title="Главная страница"><i class="icon-home icon-white"></i></a>
               {% for item in main_menu %}
                 <a class="btn btn-small btn-inverse{% if request.blueprint == item.module %}{% endif %}" href="{{ url_for(item.module + '.index') }}" title="{{ item.name }}">{{ item.name }}</a>
               {% endfor %}

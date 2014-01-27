@@ -3,21 +3,18 @@
 {% block content %}
   <legend>{%- if info['name'] -%}{{ info['name'] }} ({{ info['code'] }}){%- else -%}{{ info['code'] }}{%- endif -%}</legend>
   {% if data %}
-    <h4>Сопоставление справочников</h4>
-    <div class="row">
+    <div class="row-fluid">
         <div class="span3">
-            <b class="nav-header">Поле исходного справочника</b>
             {% if fields %}
-            <select name="origin_fields" class="span3">
+            <select name="origin_fields">
                 {% for field in fields %}
                 <option value="{{ field }}">{{ field }}</option>
                 {% endfor %}
             </select>
             {% endif %}
         </div>
-        <div class="span5">
-            <b class="nav-header">Сопоставляемый справочник</b>
-            <select name="linked_collection" class="span5" id="linked_collection">
+        <div class="span6">
+            <select name="linked_collection" class="span8" id="linked_collection">
             <option value="">- выберите справочник для связи -</option>
             {% for item in data %}
                 {%- if item._id != info._id -%}
@@ -28,12 +25,7 @@
             {% endfor %}
             </select>
         </div>
-        <div class="span4">
-            <b class="nav-header">Поле сопоставляемого справочника</b>
-            <select id="linked_field" class="span4" disabled>
-                <option>- выберите справочник -</option>
-            </select>
-        </div>
+        <div class="span3"></div>
     </div>
   {% endif %}
 {% endblock %}

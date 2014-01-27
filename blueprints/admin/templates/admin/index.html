@@ -16,7 +16,13 @@
         <tbody>
             {% for item in column %}
             <tr>
-                <td><a class="icon label label-info" href="{{ url_for('.dict_edit', _id=item._id) }}" title="Редактировать справочник"><i class="icon-white icon-pencil"></i></a></td>
+                <td>
+                    {% if item.oid %}
+                    <a class="icon label" href="{{ url_for('.dict_view', _id=item._id) }}" title="Просмотр значений"><i class="icon-white icon-list"></i></a>
+                    {% else %}
+                    <a class="icon label label-info" href="{{ url_for('.dict_edit', _id=item._id) }}" title="Редактировать справочник"><i class="icon-white icon-pencil"></i></a>
+                    {% endif %}
+                </td>
                 <td>
                     {%- for key, value in item|dictsort() -%}
                         <b>{{ key }}:</b>
