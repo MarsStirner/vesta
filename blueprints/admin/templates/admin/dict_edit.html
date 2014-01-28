@@ -3,37 +3,160 @@
 {% block content %}
   <legend>{%- if info['name'] -%}{{ info['name'] }} ({{ info['code'] }}){%- else -%}{{ info['code'] }}{%- endif -%}</legend>
   {% if data %}
-    <h4>Сопоставление справочников</h4>
-    <div class="row">
-        <div class="span3">
-            <b class="nav-header">Поле исходного справочника</b>
-            {% if fields %}
-            <select name="origin_fields" class="span3">
-                {% for field in fields %}
-                <option value="{{ field }}">{{ field }}</option>
-                {% endfor %}
-            </select>
-            {% endif %}
+    <h4>Сопоставление со справочником</h4>
+    <form action="" method="post" id="link_form">
+    <div class="alert alert-error hide" title="Ошибка" id="link_form_error">Заданы не все параметры</div>
+    {% with errors = get_flashed_messages(category_filter=["error"]) %}
+      {% if errors %}
+        <div class="alert alert-error" title="Ошибка записи">
+            <strong>Ошибка</strong>
+            <ul class="unstyled no-vmargin">
+            {% for error in errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
         </div>
+      {% endif %}
+    {% endwith %}
+    {% with messages = get_flashed_messages(category_filter=["info"]) %}
+      {% if messages %}
+        <div class="alert alert-success" title="Сообщение">
+            <ul class="unstyled no-vmargin">
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+      {% endif %}
+    {% endwith %}
+    <div class="row">
         <div class="span5">
             <b class="nav-header">Сопоставляемый справочник</b>
             <select name="linked_collection" class="span5" id="linked_collection">
             <option value="">- выберите справочник для связи -</option>
             {% for item in data %}
                 {%- if item._id != info._id -%}
-                <option value="{{ item._id }}">
+                <option value="{{ item.code }}">
                     {%- if item['name'] -%}{{ item['name'] }} ({{ item['code'] }}){%- else -%}{{ item['code'] }}{%- endif -%}
                 </option>
                 {% endif %}
             {% endfor %}
             </select>
         </div>
+        <div class="span3">
+            <b class="nav-header">Поле исходного справочника</b>
+            {% if fields %}
+            <select name="origin_field" id="origin_field" class="span3">
+                {% for field in fields %}
+                <option value="{{ field }}">{{ field }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+        </div>
         <div class="span4">
             <b class="nav-header">Поле сопоставляемого справочника</b>
-            <select id="linked_field" class="span4" disabled>
-                <option>- выберите справочник -</option>
+            <select name="linked_field" id="linked_field" class="span4" disabled>
+                <option value="">- выберите справочник -</option>
             </select>
         </div>
     </div>
+    <div class="control-group no-vmargin">
+        <div class="controls">
+            <button type="submit" class="btn btn-large btn-success">Сохранить</button>
+            <a href="{{ url_for('.index') }}" class="btn btn-large" id="reset">Отмена</a>
+        </div>
+    </div>
+    </form>
   {% endif %}
+  {% if documents %}
+      <legend>Значения справочника</legend>
+      <table class="table table-striped table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th width="1%"></th>
+                <th>Информация</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in documents %}
+            <tr>
+                <td>
+                    {% if not item.oid %}
+                        <a class="icon label label-info" href="{{ url_for('.dict_edit', _id=item._id) }}" title="Редактировать документ"><i class="icon-white icon-pencil"></i></a>
+                    {% endif %}
+                </td>
+                <td>
+                    {%- for key, value in item|dictsort() -%}
+                        <b>{{ key }}:</b>
+                        {%- if value is mapping -%}
+                            {%- for kk, vv in value|dictsort() -%}
+                                {%- if kk == 'date' -%}
+                                {{ vv }}
+                                {%- else -%}
+                                {{ vv }}
+                                {%- endif -%}
+                                {%- if not loop.last -%}, {%- endif -%}
+                            {%- endfor -%}
+                        {%- else -%}
+                            {{ value }}
+                        {%- endif -%}<br />
+                    {%- endfor -%}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+  {% endif %}
+{% endblock %}
+{% block modules_js %}
+<script type="application/javascript">
+    function get_show_fields(code){
+        if(code){
+           $.ajax({
+            url: "{{ url_for('.get_fields') }}" + code,
+            crossDomain: true,
+            cache: false, // обязательно для IE
+            dataType: 'json',
+            success: function (data) {
+                var $lf = $('#linked_field');
+                $lf.find('option[value!=""]').remove().end();
+                if(data['result'].length > 0){
+                    $.each(data['result'], function(key, value) {
+                        $lf.append($('<option>', { value : value }).text(value));
+                    });
+                    $lf.removeAttr('disabled');
+                }
+            }
+        });
+        }
+    }
+    $(document).ready(function(){
+         $(document).ready(function () {
+            $("body").on({
+                ajaxStart: function() {
+                    $(this).addClass("loading");
+                },
+                ajaxStop: function() {
+                    $(this).removeClass("loading");
+                }
+            });
+        });
+        var $lc = $('#linked_collection');
+        get_show_fields($lc.val());
+        $lc.change(function(){
+            get_show_fields($(this).val());
+        });
+        $('form#link_form').submit(function(){
+            var $lfe = $('#link_form_error');
+            if ($('#linked_collection').val() && $('#origin_field').val() && $('#linked_field').val()){
+                $lfe.hide();
+                $('body').addClass("loading");
+                return true;
+            }else{
+                $lfe.show();
+                return false;
+            }
+        });
+    });
+</script>
 {% endblock %}
