@@ -1,31 +1,94 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
+  {% if info %}
   <legend>{%- if info['name'] -%}{{ info['name'] }} ({{ info['code'] }}){%- else -%}{{ info['code'] }}{%- endif -%}</legend>
-  {% if data %}
-    <div class="row-fluid">
-        <div class="span3">
-            {% if fields %}
-            <select name="origin_fields">
-                {% for field in fields %}
-                <option value="{{ field }}">{{ field }}</option>
-                {% endfor %}
-            </select>
-            {% endif %}
-        </div>
-        <div class="span6">
-            <select name="linked_collection" class="span8" id="linked_collection">
-            <option value="">- выберите справочник для связи -</option>
-            {% for item in data %}
-                {%- if item._id != info._id -%}
-                <option value="{{ item._id }}">
-                    {%- if item['name'] -%}{{ item['name'] }} ({{ item['code'] }}){%- else -%}{{ item['code'] }}{%- endif -%}
-                </option>
-                {% endif %}
-            {% endfor %}
-            </select>
-        </div>
-        <div class="span3"></div>
-    </div>
   {% endif %}
+  {% if documents %}
+      <legend>Значения справочника</legend>
+      <table class="table table-striped table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th>Информация</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in documents %}
+            <tr>
+                <td>
+                    {%- for key, value in item|dictsort() -%}
+                        {% if key != '_id' %}
+                        <b>{{ key }}:</b>
+                        {%- if value is mapping -%}
+                            {%- for kk, vv in value|dictsort() -%}
+                                {%- if kk == 'date' -%}
+                                {{ vv }}
+                                {%- else -%}
+                                {{ vv }}
+                                {%- endif -%}
+                                {%- if not loop.last -%}, {%- endif -%}
+                            {%- endfor -%}
+                        {%- else -%}
+                            {{ value }}
+                        {%- endif -%}<br />
+                        {%- endif -%}
+                    {%- endfor -%}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+  {% endif %}
+{% endblock %}
+{% block modules_js %}
+<script type="application/javascript">
+    function get_show_fields(code){
+        if(code){
+           $.ajax({
+            url: "{{ url_for('.get_fields') }}" + code,
+            crossDomain: true,
+            cache: false, // обязательно для IE
+            dataType: 'json',
+            success: function (data) {
+                var $lf = $('#linked_field');
+                $lf.find('option[value!=""]').remove().end();
+                if(data['result'].length > 0){
+                    $.each(data['result'], function(key, value) {
+                        $lf.append($('<option>', { value : value }).text(value));
+                    });
+                    $lf.removeAttr('disabled');
+                }
+            }
+        });
+        }
+    }
+    $(document).ready(function(){
+         $(document).ready(function () {
+            $("body").on({
+                ajaxStart: function() {
+                    $(this).addClass("loading");
+                },
+                ajaxStop: function() {
+                    $(this).removeClass("loading");
+                }
+            });
+        });
+        var $lc = $('#linked_collection');
+        get_show_fields($lc.val());
+        $lc.change(function(){
+            get_show_fields($(this).val());
+        });
+        $('form#link_form').submit(function(){
+            var $lfe = $('#link_form_error');
+            if ($('#linked_collection').val() && $('#origin_field').val() && $('#linked_field').val()){
+                $lfe.hide();
+                $('body').addClass("loading");
+                return true;
+            }else{
+                $lfe.show();
+                return false;
+            }
+        });
+    });
+</script>
 {% endblock %}

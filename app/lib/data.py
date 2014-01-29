@@ -117,7 +117,7 @@ class Dictionary(object):
         self.db_client, self.db = MongoConnection.provider(MONGODB_DB)
         self.code = code
         self.collection = self.db[code]
-        self._dict_name_exists = None
+        self._dict_name_exists = None # TODO: понять необходимость этого свойства
 
     @property
     def dict_name_exists(self):

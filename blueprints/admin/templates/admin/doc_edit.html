@@ -1,0 +1,75 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+    {% if document %}
+    <legend>Редактирование документа</legend>
+    <form class="form-horizontal" method="post" action="">
+        {% with errors = get_flashed_messages(category_filter=["error"]) %}
+          {% if errors %}
+            <div class="alert alert-error" title="Ошибка записи">
+                <strong>Ошибка</strong>
+                <ul class="unstyled no-vmargin">
+                {% for error in errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+          {% endif %}
+        {% endwith %}
+        {% with messages = get_flashed_messages(category_filter=["info"]) %}
+          {% if messages %}
+            <div class="alert alert-success" title="Сообщение">
+                <ul class="unstyled no-vmargin">
+                {% for message in messages %}
+                  <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+          {% endif %}
+        {% endwith %}
+        <div class="row">
+            <div class="span5">
+                {% for key, value in document|dictsort() %}
+                  {% if key != '_id' and value is not mapping %}
+                  <div class="control-group">
+                    <label class="control-label" for="{{ key }}">{{ key }}</label>
+                    <div class="controls">
+                      <input type="text" id="{{ key }}" name="{{ key }}" value="{{ value|default("") }}">
+                    </div>
+                  </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="span7">
+            {% if linked_docs %}
+            <p class="lead">Связанные значения из: <small class="muted">{%- if linked_dict['name'] -%}{{ linked_dict['name'] }} ({{ linked_dict['code'] }}){%- else -%}{{ linked_dict['code'] }}{%- endif -%}</small></p>
+            <select name="linked" id="linked_docs" class="span7">
+            <option value="">- связанное значение -</option>
+                {% for item in linked_docs %}
+                    <option value="{{ item._id }}"{% if document[linked_dict['code']] and document[linked_dict['code']].get('_id') == item._id %} selected{% endif %}>
+                    {%- for key, value in item|dictsort() -%}
+                    {%- if key != '_id' and value is not mapping and value != None -%}
+                        {{ value }}{%- if not loop.last %} {% endif -%}
+                    {%- endif -%}
+                    {%- endfor -%}
+                    </option>
+                {% endfor %}
+            </select>
+            {% endif %}
+            </div>
+        </div>
+        <hr>
+        <div class="controls">
+          <button type="submit" class="btn btn-large btn-success">Сохранить</button>
+          <a href="{{ url_for('.index') }}" class="btn btn-large">Отменить</a>
+        </div>
+    </form>
+    {% endif %}
+{% endblock %}
+{% block module_js %}
+<script type="text/javascript">
+$(document).ready(function(){
+    $('#linked_docs').select2();
+});
+</script>
+{% endblock %}

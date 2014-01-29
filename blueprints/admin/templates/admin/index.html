@@ -25,7 +25,31 @@
                 </td>
                 <td>
                     {%- for key, value in item|dictsort() -%}
-                        <b>{{ key }}:</b>
+                        {% if key == 'linked' %}
+                            <b>{{ key }}: </b><br>
+                            <ul>
+                            {%- for kk, vv in value|dictsort() -%}
+                                <li><b><i>{{ kk }}: </i></b>
+                                 {%- if vv is mapping -%}
+                                     <ul>
+                                    {%- for k, v in vv|dictsort() -%}
+                                        <li>
+                                        {%- if k == 'date' -%}
+                                        {{ v }}
+                                        {%- else -%}
+                                        {{ v }}
+                                        {%- endif -%}
+                                        </li>
+                                    {%- endfor -%}
+                                     </ul>
+                                {%- else -%}
+                                    {{ vv }}
+                                {%- endif -%}
+                                </li>
+                            {%- endfor -%}
+                            </ul>
+                        {% elif key != '_id' %}
+                        <b>{{ key }}: </b>
                         {%- if value is mapping -%}
                             {%- for kk, vv in value|dictsort() -%}
                                 {%- if kk == 'date' -%}
@@ -33,11 +57,12 @@
                                 {%- else -%}
                                 {{ vv }}
                                 {%- endif -%}
-                                {%- if not loop.last -%}, {%- endif -%}
+                                {%- if not loop.last -%}, {% endif -%}
                             {%- endfor -%}
                         {%- else -%}
                             {{ value }}
                         {%- endif -%}<br />
+                        {%- endif -%}
                     {%- endfor -%}
                 </td>
             </tr>

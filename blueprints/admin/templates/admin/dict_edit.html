@@ -1,10 +1,27 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
+  {% if info %}
   <legend>{%- if info['name'] -%}{{ info['name'] }} ({{ info['code'] }}){%- else -%}{{ info['code'] }}{%- endif -%}</legend>
+  {% endif %}
+  {% set linked_dict=info.get('linked', {}).get('collection', {}) %}
   {% if data %}
-    <h4>Сопоставление со справочником</h4>
+    <h4>Связанный справочник</h4>
     <form action="" method="post" id="link_form">
+    <div class="row">
+        <div class="span12">
+            <select name="linked_collection" class="span12" id="linked_collection">
+            <option value="">- выберите справочник для связи -</option>
+            {% for item in data %}
+                {%- if item._id != info._id -%}
+                <option value="{{ item.code }}"{% if linked_dict.get('_id') == item._id %} selected{% endif %}>
+                    {%- if item['name'] -%}{{ item['name'] }} ({{ item['code'] }}){%- else -%}{{ item['code'] }}{%- endif -%}
+                </option>
+                {% endif %}
+            {% endfor %}
+            </select>
+        </div>
+    </div>
     <div class="alert alert-error hide" title="Ошибка" id="link_form_error">Заданы не все параметры</div>
     {% with errors = get_flashed_messages(category_filter=["error"]) %}
       {% if errors %}
@@ -30,23 +47,11 @@
       {% endif %}
     {% endwith %}
     <div class="row">
-        <div class="span5">
-            <b class="nav-header">Сопоставляемый справочник</b>
-            <select name="linked_collection" class="span5" id="linked_collection">
-            <option value="">- выберите справочник для связи -</option>
-            {% for item in data %}
-                {%- if item._id != info._id -%}
-                <option value="{{ item.code }}">
-                    {%- if item['name'] -%}{{ item['name'] }} ({{ item['code'] }}){%- else -%}{{ item['code'] }}{%- endif -%}
-                </option>
-                {% endif %}
-            {% endfor %}
-            </select>
-        </div>
         <div class="span3">
             <b class="nav-header">Поле исходного справочника</b>
             {% if fields %}
             <select name="origin_field" id="origin_field" class="span3">
+                <option value="">- выберите значение -</option>
                 {% for field in fields %}
                 <option value="{{ field }}">{{ field }}</option>
                 {% endfor %}
@@ -75,6 +80,7 @@
             <tr>
                 <th width="1%"></th>
                 <th>Информация</th>
+                <th>Связанные данные{% if linked_dict.get('code') %} ({{ linked_dict.get('code') }}){% endif %}</th>
             </tr>
         </thead>
         <tbody>
@@ -82,11 +88,12 @@
             <tr>
                 <td>
                     {% if not item.oid %}
-                        <a class="icon label label-info" href="{{ url_for('.dict_edit', _id=item._id) }}" title="Редактировать документ"><i class="icon-white icon-pencil"></i></a>
+                        <a class="icon label label-info" href="{{ url_for('.doc_edit', code=info['code'], _id=item._id) }}" title="Редактировать документ"><i class="icon-white icon-pencil"></i></a>
                     {% endif %}
                 </td>
                 <td>
                     {%- for key, value in item|dictsort() -%}
+                        {% if key != linked_dict.get('code') and key != '_id' %}
                         <b>{{ key }}:</b>
                         {%- if value is mapping -%}
                             {%- for kk, vv in value|dictsort() -%}
@@ -100,7 +107,29 @@
                         {%- else -%}
                             {{ value }}
                         {%- endif -%}<br />
+                        {%- endif -%}
                     {%- endfor -%}
+                </td>
+                <td>
+                    {% if linked_dict.get('code') in item %}
+                        {%- for key, value in item[linked_dict.get('code')]|dictsort() -%}
+                        {% if key != '_id' %}
+                        <b>{{ key }}:</b>
+                        {%- if value is mapping -%}
+                            {%- for kk, vv in value|dictsort() -%}
+                                {%- if kk == 'date' -%}
+                                {{ vv }}
+                                {%- else -%}
+                                {{ vv }}
+                                {%- endif -%}
+                                {%- if not loop.last -%}, {%- endif -%}
+                            {%- endfor -%}
+                        {%- else -%}
+                            {{ value }}
+                        {%- endif -%}<br />
+                        {%- endif -%}
+                    {%- endfor -%}
+                    {%- endif -%}
                 </td>
             </tr>
             {% endfor %}
@@ -148,7 +177,7 @@
         });
         $('form#link_form').submit(function(){
             var $lfe = $('#link_form_error');
-            if ($('#linked_collection').val() && $('#origin_field').val() && $('#linked_field').val()){
+            if ($('#linked_collection').val() && ($('#origin_field').val() && $('#linked_field').val() || !$('#origin_field').val() && !$('#linked_field').val())){
                 $lfe.hide();
                 $('body').addClass("loading");
                 return true;

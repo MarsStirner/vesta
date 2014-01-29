@@ -41,9 +41,11 @@ class Worker:
             logger.error(u'Не найден привязываемая коллекция ({0}) в dict_names'.format(collection_code),
                          extra=dict(tags=['worker']))
             return False
+        version = linked_collection.pop('version')
         origin_collection.update({'linked': {'collection': linked_collection,
                                              'origin_field': origin_field,
                                              'linked_field': linked_field}})
         dict_name.update(origin_collection.pop('_id'), origin_collection)
 
-        self.__link_documents(collection_code, origin_field, linked_field)
+        if origin_field and linked_field:
+            self.__link_documents(collection_code, origin_field, linked_field)
