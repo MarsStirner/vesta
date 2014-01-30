@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 from flask.views import MethodView
 from flask import g, make_response, abort, request
 from app.lib.utils.exceptions import InvalidAPIUsage
@@ -270,7 +271,7 @@ class DictionaryAPI(MethodView, APIMixin):
         mod.add_url_rule('{0}<string:document_id>/'.format(url), view_func=f, methods=['GET', 'PUT', 'DELETE'])
 
 
-@module.route('/<code>/<field>/<field_value>/nsi/')
+@module.route('/<code>/<field>/<field_value>/', methods=['GET'])
 def get_linked_data(code, field, field_value):
     # TODO: try-except
     obj = Dictionary(code)
@@ -290,3 +291,32 @@ def get_linked_data(code, field, field_value):
     except InvalidId, e:
         raise InvalidAPIUsage(e.message, status_code=404)
     return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], data=result[linked_dict['code']])), 200)
+
+
+def _prepare_find(data):
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if isinstance(value, str) or isinstance(value, unicode):
+                data[key] = re.compile(value, re.IGNORECASE)
+    return data
+
+
+@module.route('/<code>/', methods=['POST'])
+def find_data(code):
+    data = APIMixin().parse_request(request)
+    obj = Dictionary(code)
+    obj_names = DictionaryNames()
+    try:
+        _dict = obj_names.get_by_code(code)
+        result = obj.get_document(_prepare_find(data))
+    except TypeError, e:
+        raise InvalidAPIUsage(e.message, status_code=400)
+    except InvalidId, e:
+        raise InvalidAPIUsage(e.message, status_code=404)
+    else:
+        ret_data = _dict
+        if not result:
+            ret_data.update(dict(data={}))
+            return make_response(vesta_jsonify(ret_data), 200)
+        ret_data.update(dict(data=result))
+    return make_response(vesta_jsonify(ret_data), 200)
