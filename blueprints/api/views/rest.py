@@ -276,14 +276,15 @@ def get_linked_data(code, field, doc_code):
     obj = Dictionary(code)
     obj_names = DictionaryNames()
     try:
-        result = obj.get_document({str(field): doc_code})
-        if not result:
-            return make_response(vesta_jsonify(), 200)
         origin_dict = obj_names.get_by_code(code)
         try:
             linked_dict = origin_dict['linked']['collection']
         except AttributeError:
             raise InvalidAPIUsage(u'Not found', status_code=404)
+
+        result = obj.get_document({str(field): doc_code})
+        if not result:
+            return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], data={}), 200)
     except TypeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
     except InvalidId, e:
