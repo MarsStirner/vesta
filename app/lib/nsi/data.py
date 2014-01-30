@@ -45,12 +45,12 @@ class NSI_Data:
                 dictionary[_key] = field.value
         return dictionary
 
-    def __get_data(self, dictionary, version):
+    def __get_data(self, dictionary, version, overwrite=False):
         obj = DictionaryNames()
         data = dict()
         local_dictionary = self.__get_local_dictionary(dictionary['code'])
         self.msg.append(u'Импорт {0} ({1})'.format(dictionary['name'], dictionary['code']))
-        if local_dictionary:
+        if local_dictionary and overwrite is False:
             if 'version' in local_dictionary:
                 local_version = local_dictionary['version']
                 if local_version['version'] != version['version']:
@@ -63,7 +63,10 @@ class NSI_Data:
                 obj.update(_id=local_dictionary['_id'], data=dictionary)
                 data = self.__get_dictionary(dictionary['code'], version['version'])
         else:
-            self.msg.append(u'Локальный справочник не существует, импортируем данные')
+            if overwrite:
+                self.msg.append(u'Перезаписываем локальный справочник')
+            else:
+                self.msg.append(u'Локальный справочник не существует, импортируем данные')
             _id = obj.add(dictionary)
             data = self.__get_dictionary(dictionary['code'], version['version'])
         return data
@@ -88,9 +91,8 @@ class NSI_Data:
             try:
                 result = obj.add_document(document)
             except AttributeError, e:
-                logger.error(
-                    self.msg.append(u'Ошибка импорта документа ({0}): {1}'.format(self.__doc_info(document), e)),
-                    extra=dict(tags=['nsi', 'import error']))
+                logger.error(u'Ошибка импорта документа ({0}): {1}'.format(self.__doc_info(document), e),
+                             extra=dict(tags=['nsi', 'import error']))
                 return False
             # else:
             #     self.msg.append(u'{0}'.format(result))
@@ -112,6 +114,8 @@ class NSI_Data:
                 latest_version['date'] = datetime.strptime(latest_version['date'], '%d.%m.%Y')
             except ValueError, e:
                 self.msg.append(e)
+                logger.error(u'Ошибка получения версии ({0}): {1}'.format(dictionary['code'], e),
+                             extra=dict(tags=['nsi', 'import error']))
         return latest_version
 
     def __update_version(self, dictionary, version):
@@ -119,7 +123,7 @@ class NSI_Data:
         obj.update_by_code(dictionary['code'], dict(version=version))
         self.msg.append(u'Обновляем версию справочника ({0}): {1}'.format(dictionary['code'], version))
 
-    def import_nsi_dictionaries(self, exclude=None):
+    def import_nsi_dictionaries(self, exclude=None, overwrite=False):
         nsi_dicts = self.__get_dictionaries()
         if nsi_dicts:
             for dict_data in nsi_dicts:
@@ -128,7 +132,7 @@ class NSI_Data:
                     continue
                 self.msg = list()
                 latest_version = self.__get_latest_version(nsi_dict)
-                data = self.__get_data(nsi_dict, version=latest_version)
+                data = self.__get_data(nsi_dict, version=latest_version, overwrite=overwrite)
                 if data:
                     result = self.__add_data(nsi_dict['code'], data)
                     if result:

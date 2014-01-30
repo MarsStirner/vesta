@@ -42,7 +42,7 @@ class NSI_Client:
                 result = list()
                 for i in xrange(1, parts_number + 1):
                     part_data = self.getRefbookPartial(code, version, i)
-                    result.append(part_data)
+                    result.extend(part_data)
         return result
 
     def getRefbook(self, code, version):
