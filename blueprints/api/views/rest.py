@@ -284,7 +284,7 @@ def get_linked_data(code, field, doc_code):
 
         result = obj.get_document({str(field): doc_code})
         if not result:
-            return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], data={}), 200)
+            return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], data={}), 200))
     except TypeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
     except InvalidId, e:
