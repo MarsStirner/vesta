@@ -270,8 +270,8 @@ class DictionaryAPI(MethodView, APIMixin):
         mod.add_url_rule('{0}<string:document_id>/'.format(url), view_func=f, methods=['GET', 'PUT', 'DELETE'])
 
 
-@module.route('/<code>/<field>/<doc_code>/nsi/')
-def get_linked_data(code, field, doc_code):
+@module.route('/<code>/<field>/<field_value>/nsi/')
+def get_linked_data(code, field, field_value):
     # TODO: try-except
     obj = Dictionary(code)
     obj_names = DictionaryNames()
@@ -282,9 +282,9 @@ def get_linked_data(code, field, doc_code):
         except AttributeError:
             raise InvalidAPIUsage(u'Not found', status_code=404)
 
-        result = obj.get_document({str(field): doc_code})
+        result = obj.get_document({str(field): field_value})
         if not result:
-            return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], data={}), 200))
+            return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], data={})), 200)
     except TypeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
     except InvalidId, e:

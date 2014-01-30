@@ -46,25 +46,25 @@
         </div>
       {% endif %}
     {% endwith %}
+    {% if fields %}
     <div class="row">
         <div class="span3">
             <b class="nav-header">Поле исходного справочника</b>
-            {% if fields %}
             <select name="origin_field" id="origin_field" class="span3">
                 <option value="">- выберите значение -</option>
                 {% for field in fields %}
-                <option value="{{ field }}">{{ field }}</option>
+                <option value="{{ field }}"{% if info['linked'] and info['linked']['origin_field'] == field %} selected{% endif %}>{{ field }}</option>
                 {% endfor %}
             </select>
-            {% endif %}
         </div>
         <div class="span4">
             <b class="nav-header">Поле сопоставляемого справочника</b>
             <select name="linked_field" id="linked_field" class="span4" disabled>
-                <option value="">- выберите справочник -</option>
+                <option value="">- выберите значение -</option>
             </select>
         </div>
     </div>
+    {% endif %}
     <div class="control-group no-vmargin">
         <div class="controls">
             <button type="submit" class="btn btn-large btn-success">Сохранить</button>
@@ -94,7 +94,7 @@
                 <td>
                     {%- for key, value in item|dictsort() -%}
                         {% if key != linked_dict.get('code') and key != '_id' %}
-                        <b>{{ key }}:</b>
+                        <b>{{ key }}: </b>
                         {%- if value is mapping -%}
                             {%- for kk, vv in value|dictsort() -%}
                                 {%- if kk == 'date' -%}
@@ -151,7 +151,15 @@
                 $lf.find('option[value!=""]').remove().end();
                 if(data['result'].length > 0){
                     $.each(data['result'], function(key, value) {
+                        {% if info['linked'] and info['linked']['linked_field'] %}
+                        var selected = false;
+                        if (value == '{{ info['linked']['linked_field'] }}'){
+                            selected = true;
+                        }
+                        $lf.append($('<option>', { value : value, selected: selected }).text(value));
+                        {% else %}
                         $lf.append($('<option>', { value : value }).text(value));
+                        {% endif %}
                     });
                     $lf.removeAttr('disabled');
                 }

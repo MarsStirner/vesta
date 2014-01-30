@@ -26,7 +26,7 @@ def dict_edit(_id):
     obj = DictionaryNames()
     info = obj.get_by_id(_id)
     collections = Collections()
-    if not info or 'code' not in info or info['code'] not in collections.get_list():
+    if not info or 'code' not in info:# or info['code'] not in collections.get_list():
         flash(u'Коллекция не существует или пуста')
         abort(404)
 
@@ -42,15 +42,20 @@ def dict_edit(_id):
         else:
             flash(u'Справочник успешно обновлён', 'info')
             return redirect(url_for('.dict_edit', _id=_id))
+    data = dict()
+    fields = dict()
+    documents = list()
     collection = Dictionary(info['code'])
     data = obj.get_list({'version': {'$exists': True}})
-    fields = _get_fields(info['code'])
+    if info['code'] in collections.get_list():
+        fields = _get_fields(info['code'])
+        documents = collection.get_list()
     try:
         return render_template('{0}/dict_edit.html'.format(module.name),
                                info=info,
                                data=data,
                                fields=fields,
-                               documents=collection.get_list())
+                               documents=documents)
     except TemplateNotFound:
         abort(404)
 

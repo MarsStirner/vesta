@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import re
 from app.lib.utils.tools import logger
 from .data import Dictionary, DictionaryNames, Collections
 
@@ -15,6 +16,7 @@ class Worker:
     def __prepare_value(self, value):
         if isinstance(value, str) or isinstance(value, unicode):
             value = value.replace('.', '')
+            value = re.compile(value, re.IGNORECASE)
         return value
 
     def __get_linked_data(self, code, field, value):
