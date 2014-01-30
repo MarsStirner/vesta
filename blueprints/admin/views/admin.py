@@ -46,14 +46,14 @@ def dict_edit(_id):
     fields = dict()
     documents = list()
     collection = Dictionary(info['code'])
-    data = obj.get_list({'version': {'$exists': True}})
+    linked_dict = obj.get_list({'version': {'$exists': True}})
     if info['code'] in collections.get_list():
         fields = _get_fields(info['code'])
-        documents = collection.get_list()
+        documents = collection.get_list(sort='id')
     try:
         return render_template('{0}/dict_edit.html'.format(module.name),
                                info=info,
-                               data=data,
+                               data=linked_dict,
                                fields=fields,
                                documents=documents)
     except TemplateNotFound:
@@ -76,7 +76,7 @@ def dict_view(_id):
                                info=info,
                                data=data,
                                fields=fields,
-                               documents=collection.get_list())
+                               documents=collection.get_list(sort='id'))
     except TemplateNotFound:
         abort(404)
 
