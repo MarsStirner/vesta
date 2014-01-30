@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
-from config import NSI_SOAP, NSI_TOKEN
+from config import NSI_SOAP, NSI_TOKEN, DEBUG
 from client import NSI_Client
 from ..data import DictionaryNames, Dictionary
 from app.lib.utils.tools import logger
@@ -137,4 +137,5 @@ class NSI_Data:
                     result = self.__add_data(nsi_dict['code'], data)
                     if result:
                         self.__update_version(nsi_dict, latest_version)
-                logger.debug(u'\n'.join(self.msg), extra=dict(tags=['nsi', 'import', nsi_dict['code']]))
+                if DEBUG:
+                    logger.debug(u'\n'.join(self.msg), extra=dict(tags=['nsi', 'import', nsi_dict['code']]))
