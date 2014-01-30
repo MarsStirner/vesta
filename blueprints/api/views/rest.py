@@ -282,6 +282,8 @@ def get_linked_data(code, field, field_value):
             linked_dict = origin_dict['linked']['collection']
         except AttributeError:
             raise InvalidAPIUsage(u'Not found', status_code=404)
+        except KeyError:
+            raise InvalidAPIUsage(u'Not found', status_code=404)
 
         result = obj.get_document({str(field): field_value})
         if not result:
