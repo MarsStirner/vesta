@@ -11,6 +11,7 @@ class MongoConnection:
             connection = MongoClient(MONGODB_HOST, tz_aware=True)
             if db_name is None:
                 db_name = MONGODB_DB
-            connection[db_name].authenticate(MONGODB_USER, MONGODB_PASSWORD, source=db_name)
+            if MONGODB_USER and MONGODB_PASSWORD:
+                connection[db_name].authenticate(MONGODB_USER, MONGODB_PASSWORD, source=db_name)
             db = connection[db_name]
         return connection, db
