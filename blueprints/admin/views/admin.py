@@ -120,6 +120,7 @@ def doc_edit(code, _id):
     document = obj.get_document({'_id': _id})
     if document:
         return render_template('{0}/doc_edit.html'.format(module.name),
+                               current_dict=current,
                                document=document,
                                linked_docs=linked_docs,
                                linked_dict=linked_dict)

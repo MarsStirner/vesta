@@ -61,7 +61,7 @@
         <hr>
         <div class="controls">
           <button type="submit" class="btn btn-large btn-success">Сохранить</button>
-          <a href="{{ url_for('.index') }}" class="btn btn-large">Отменить</a>
+          <a href="{{ url_for('.dict_edit', _id=current_dict['_id']) }}" class="btn btn-large">Отменить</a>
         </div>
     </form>
     {% endif %}
