@@ -49,7 +49,7 @@ def dict_edit(_id):
     linked_dict = obj.get_list({'version': {'$exists': True}})
     if info['code'] in collections.get_list():
         fields = _get_fields(info['code'])
-        documents = collection.get_list(sort='id')
+        documents = collection.get_list(sort=[('id', 1)])
     try:
         return render_template('{0}/dict_edit.html'.format(module.name),
                                info=info,
