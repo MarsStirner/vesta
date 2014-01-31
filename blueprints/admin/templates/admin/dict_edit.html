@@ -111,10 +111,11 @@
                     {%- endfor -%}
                 </td>
                 <td>
+                    {% set linked_document = None %}
                     {% if linked_dict.get('code') in item %}
                         {% set linked_document = item[linked_dict.get('code')] %}
-                    {% elif 'linked_collection' in item %}
-                        {% set linked_document = item['linked_collection'] %}
+                    {% elif 'linked_collection' in item and item['linked_collection'] in item %}
+                        {% set linked_document = item[item['linked_collection']] %}
                     {% endif %}
                     {% if linked_document %}
                         {%- for key, value in linked_document|dictsort() -%}
