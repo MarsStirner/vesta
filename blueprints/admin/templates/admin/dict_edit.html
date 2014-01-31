@@ -120,7 +120,7 @@
                     {% if linked_document %}
                         {%- for key, value in linked_document|dictsort() -%}
                             {% if key != '_id' %}
-                            <b>{{ key }}:</b>
+                            <b>{{ key }}: </b>
                             {%- if value is mapping -%}
                                 {%- for kk, vv in value|dictsort() -%}
                                     {%- if kk == 'date' -%}
