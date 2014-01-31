@@ -16,4 +16,5 @@ refbooks = ['rbAcheResult',
             'rbSocStatusClassTypeAssoc',
             'rbSocStatusType',
             'rbSpeciality',
+            'Organisation',
             'rbTraumaType']

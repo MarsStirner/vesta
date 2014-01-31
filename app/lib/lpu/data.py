@@ -23,6 +23,8 @@ class LPU_Data:
     def __prepare_document(self, row):
         dictionary = dict()
         for key, value in row.items():
+            if isinstance(value, str) or isinstance(value, unicode):
+                value = value.strip()
             dictionary[key] = value
         return dictionary
 
