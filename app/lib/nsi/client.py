@@ -45,6 +45,17 @@ class NSI_Client:
                     result.extend(part_data)
         return result
 
+    def get_parts_number(self, code, version):
+        # Получаем количество частей
+        parts = self.getRefbookParts(code, version)
+        parts_number = int(parts[0].value)
+        return parts_number
+
+    def get_parts_data(self, code, version, number):
+        # Получаем количество частей
+        part_data = self.getRefbookPartial(code, version, number)
+        return part_data
+
     def getRefbook(self, code, version):
         try:
             result = self.client.service.getRefbook(userKey=self.user_key,
