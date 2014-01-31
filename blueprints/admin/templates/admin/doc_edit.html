@@ -41,10 +41,20 @@
                 {% endfor %}
             </div>
             <div class="span7">
-            {% if linked_docs %}
-            <p class="lead">Связанные значения из: <small class="muted">{%- if linked_dict['name'] -%}{{ linked_dict['name'] }} ({{ linked_dict['code'] }}){%- else -%}{{ linked_dict['code'] }}{%- endif -%}</small></p>
+            <p class="lead">Связанные значения</p>
+            <b class="nav-header">Справочник, с которым связано значение</b>
+            <select name="linked_collection" class="span7" id="linked_collection">
+            <option value="">- выберите справочник для связи -</option>
+            {% for item in linked_dicts %}
+                <option value="{{ item.code }}"{% if linked_dict and linked_dict['_id'] == item._id %} selected{% endif %}>
+                    {%- if item['name'] -%}{{ item['name'] }} ({{ item['code'] }}){%- else -%}{{ item['code'] }}{%- endif -%}
+                </option>
+            {% endfor %}
+            </select>
+            <b class="nav-header">Связанное значение</b>
             <select name="linked" id="linked_docs" class="span7">
             <option value="">- связанное значение -</option>
+            {% if linked_docs %}
                 {% for item in linked_docs %}
                     <option value="{{ item._id }}"{% if document[linked_dict['code']] and document[linked_dict['code']].get('_id') == item._id %} selected{% endif %}>
                     {%- for key, value in item|dictsort() -%}
@@ -54,8 +64,8 @@
                     {%- endfor -%}
                     </option>
                 {% endfor %}
-            </select>
             {% endif %}
+            </select>
             </div>
         </div>
         <hr>
@@ -68,8 +78,56 @@
 {% endblock %}
 {% block modules_js %}
 <script type="text/javascript">
+function get_show_data(code){
+    if(code){
+       $.ajax({
+        url: "{{ url_for('.get_documents') }}" + code,
+        crossDomain: true,
+        cache: false, // обязательно для IE
+        dataType: 'json',
+        success: function (data) {
+            var $lf = $('#linked_docs');
+            $lf.find('option[value!=""]').remove().end();
+            if(data['result'].length > 0){
+                $.each(data['result'], function(key, value) {
+                    var _option_text = "";
+                    for (var kk in value){
+                        if (kk != '_id' && value[kk]){
+                            if (value.hasOwnProperty(kk)) {
+                                _option_text += value[kk] + ' ';
+                            }
+                        }
+                    }
+                    {% if document[linked_dict['code']] and document[linked_dict['code']].get('_id') %}
+                    var selected = false;
+                    if (value['_id'] == '{{ document[linked_dict['code']].get('_id') }}'){
+                        selected = true;
+                    }
+                    $lf.append($('<option>', { value : value['_id'], selected: selected }).text(_option_text));
+                    {% else %}
+                    $lf.append($('<option>', { value : value['_id'] }).text(_option_text));
+                    {% endif %}
+                });
+                $lf.removeAttr('disabled');
+            }
+        }
+    });
+    }
+}
 $(document).ready(function(){
     $('#linked_docs').select2();
+    $("body").on({
+        ajaxStart: function() {
+            $(this).addClass("loading");
+        },
+        ajaxStop: function() {
+            $(this).removeClass("loading");
+        }
+    });
+    var $lc = $('#linked_collection');
+    $lc.change(function(){
+        get_show_data($(this).val());
+    });
 });
 </script>
 {% endblock %}

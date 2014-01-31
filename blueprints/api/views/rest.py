@@ -271,28 +271,47 @@ class DictionaryAPI(MethodView, APIMixin):
         mod.add_url_rule('{0}<string:document_id>/'.format(url), view_func=f, methods=['GET', 'PUT', 'DELETE'])
 
 
+def _get_linked_dict(document, collection):
+    # Если в документе задана привязка к справочнику - используем её
+    if 'linked_collection' in document:
+        obj_names = DictionaryNames()
+        linked_dict = obj_names.get_by_code(document['linked_collection'])
+        return linked_dict
+
+    # Иначе смотрим на привязку самого справочника
+    try:
+        linked_dict = collection['linked']['collection']
+    except AttributeError:
+        raise InvalidAPIUsage(u'Not found', status_code=404)
+    except KeyError:
+        raise InvalidAPIUsage(u'Not found', status_code=404)
+    else:
+        return linked_dict
+
+
 @module.route('/<code>/<field>/<field_value>/', methods=['GET'])
 def get_linked_data(code, field, field_value):
     # TODO: try-except
     obj = Dictionary(code)
     obj_names = DictionaryNames()
+    document = obj.get_document({str(field): field_value})
+    if not document:
+        raise InvalidAPIUsage(u'Not found', status_code=404)
     try:
         origin_dict = obj_names.get_by_code(code)
         try:
-            linked_dict = origin_dict['linked']['collection']
+            linked_dict = _get_linked_dict(document, origin_dict)
         except AttributeError:
             raise InvalidAPIUsage(u'Not found', status_code=404)
         except KeyError:
             raise InvalidAPIUsage(u'Not found', status_code=404)
-
-        result = obj.get_document({str(field): field_value})
-        if not result:
+        if not document:
             return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], data={})), 200)
     except TypeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
     except InvalidId, e:
         raise InvalidAPIUsage(e.message, status_code=404)
-    return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], data=result[linked_dict['code']])), 200)
+    return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], data=document[linked_dict['code']])), 200)
 
 
 def _prepare_find(data):

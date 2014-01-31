@@ -161,6 +161,24 @@ class Dictionary(object):
             raise AttributeError(error)
         return result
 
+    def unset_attr(self, _id, attr):
+        if _id is not None:
+            _id = ObjectId(_id)
+            try:
+                #TODO: use SONManipulator for ids in different clients?
+                self.collection.update({'_id': _id}, {'$unset': {attr: ""}})
+            except TypeError, e:
+                error = u'Некорректные входные параметры ({0}): {1}'.format(e, attr)
+                logger.error(error)
+                raise TypeError(error)
+            else:
+                result = _id
+        else:
+            error = u'Некорректные входные параметры: {0}'.format(_id)
+            logger.error(error)
+            raise AttributeError(error)
+        return result
+
     def add_documents(self, data=list()):
         result = None
         if data is not None:

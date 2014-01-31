@@ -9,6 +9,7 @@ from jinja2 import TemplateNotFound
 from ..app import module
 from app.lib.data import Collections, Dictionary, DictionaryNames
 from app.lib.worker import Worker
+from app.lib.utils.tools import jsonify as vesta_jsonify, json
 
 
 @module.route('/')
@@ -76,10 +77,27 @@ def dict_view(_id):
                                info=info,
                                data=data,
                                fields=fields,
-                               documents=collection.get_list(sort='id'))
+                               documents=collection.get_list(sort='id', limit=300))
     except TemplateNotFound:
         abort(404)
 
+
+def _get_linked_dict(document, collection):
+    # Если в документе задана привязка к справочнику - используем её
+    if 'linked_collection' in document:
+        obj_names = DictionaryNames()
+        linked_dict = obj_names.get_by_code(document['linked_collection'])
+        return linked_dict
+
+    # Иначе смотрим на привязку самого справочника
+    try:
+        linked_dict = collection['linked']['collection']
+    except AttributeError:
+        return None
+    except KeyError:
+        return None
+    else:
+        return linked_dict
 
 @module.route('/doc/edit/<code>/<_id>/', methods=['GET', 'POST'])
 def doc_edit(code, _id):
@@ -89,15 +107,15 @@ def doc_edit(code, _id):
     linked_code = None
     linked_docs = []
     linked_dict = dict()
+    linked_dicts = dict_names.get_list({'version': {'$exists': True}})
     obj = Dictionary(code)
-    try:
-        linked_code = current['linked']['collection']['code']
-    except KeyError:
-        pass
-    else:
+    document = obj.get_document({'_id': _id})
+
+    linked_dict = _get_linked_dict(document, current)
+    if linked_dict:
+        linked_code = linked_dict['code']
         linked = Dictionary(linked_code)
         linked_docs = linked.get_list()
-        linked_dict = current['linked']['collection']
 
     if request.method == 'POST':
         data = dict()
@@ -105,10 +123,21 @@ def doc_edit(code, _id):
             for key, value in request.form.items():
                 data[key] = value
         linked_id = data.pop('linked')
+        _post_linked_code = data.pop('linked_collection')
         data.update({'_id': _id})
-        if linked_id and linked and linked_code:
-            linked_document = linked.get_document({'_id': linked_id})
-            data.update({linked_code: linked_document})
+        if _post_linked_code:
+            if _post_linked_code != linked_code:
+                linked_code = _post_linked_code
+                data.update({'linked_collection': linked_code})
+            else:
+                obj.unset_attr(_id, 'linked_collection')
+
+            if linked_id:
+                linked = Dictionary(linked_code)
+                linked_document = linked.get_document({'_id': linked_id})
+                data.update({linked_code: linked_document})
+            else:
+                obj.unset_attr(_id, linked_code)
         try:
             obj.add_document(data)
         except Exception, e:
@@ -117,12 +146,12 @@ def doc_edit(code, _id):
             flash(u'Документ сохранён', 'info')
             return redirect(url_for('.doc_edit', code=code, _id=_id))
 
-    document = obj.get_document({'_id': _id})
     if document:
         return render_template('{0}/doc_edit.html'.format(module.name),
                                current_dict=current,
                                document=document,
                                linked_docs=linked_docs,
+                               linked_dicts=linked_dicts,
                                linked_dict=linked_dict)
 
 
@@ -131,6 +160,15 @@ def doc_edit(code, _id):
 def get_fields(code=None):
     if code:
         return jsonify(result=_get_fields(code))
+
+
+@module.route('/get_documents/')
+@module.route('/get_documents/<code>')
+def get_documents(code=None):
+    if code:
+        obj = Dictionary(code)
+        data = obj.get_list()
+        return vesta_jsonify(result=list(data))
 
 
 def _get_fields(code):
