@@ -138,6 +138,7 @@ def doc_edit(code, _id):
                 data.update({linked_code: linked_document})
             else:
                 obj.unset_attr(_id, linked_code)
+                obj.unset_attr(_id, 'linked_collection')
         try:
             obj.add_document(data)
         except Exception, e:
