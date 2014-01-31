@@ -93,7 +93,7 @@
                 </td>
                 <td>
                     {%- for key, value in item|dictsort() -%}
-                        {% if key != linked_dict.get('code') and key != '_id' %}
+                        {% if key != linked_dict.get('code') and key != item['linked_collection'] and key != '_id' %}
                         <b>{{ key }}: </b>
                         {%- if value is mapping -%}
                             {%- for kk, vv in value|dictsort() -%}
@@ -112,23 +112,28 @@
                 </td>
                 <td>
                     {% if linked_dict.get('code') in item %}
-                        {%- for key, value in item[linked_dict.get('code')]|dictsort() -%}
-                        {% if key != '_id' %}
-                        <b>{{ key }}:</b>
-                        {%- if value is mapping -%}
-                            {%- for kk, vv in value|dictsort() -%}
-                                {%- if kk == 'date' -%}
-                                {{ vv }}
-                                {%- else -%}
-                                {{ vv }}
-                                {%- endif -%}
-                                {%- if not loop.last -%}, {%- endif -%}
-                            {%- endfor -%}
-                        {%- else -%}
-                            {{ value }}
-                        {%- endif -%}<br />
-                        {%- endif -%}
-                    {%- endfor -%}
+                        {% set linked_document = item[linked_dict.get('code')] %}
+                    {% elif 'linked_collection' in item %}
+                        {% set linked_document = item['linked_collection'] %}
+                    {% endif %}
+                    {% if linked_document %}
+                        {%- for key, value in linked_document|dictsort() -%}
+                            {% if key != '_id' %}
+                            <b>{{ key }}:</b>
+                            {%- if value is mapping -%}
+                                {%- for kk, vv in value|dictsort() -%}
+                                    {%- if kk == 'date' -%}
+                                    {{ vv }}
+                                    {%- else -%}
+                                    {{ vv }}
+                                    {%- endif -%}
+                                    {%- if not loop.last -%}, {%- endif -%}
+                                {%- endfor -%}
+                            {%- else -%}
+                                {{ value }}
+                            {%- endif -%}<br />
+                            {%- endif -%}
+                        {%- endfor -%}
                     {%- endif -%}
                 </td>
             </tr>
