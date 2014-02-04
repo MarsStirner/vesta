@@ -62,10 +62,16 @@ class LPU_Data:
         result = connection.execute('SELECT * FROM {0} WHERE 1 ORDER BY id'.format(code))
         return result
 
-    def import_lpu_dictionaries(self, dictionaries):
+    def __clear_data(self, code):
+        obj = Dictionary(code)
+        obj.remove()
+
+    def import_lpu_dictionaries(self, dictionaries, clear=False):
         for code in dictionaries:
             self.msg = list()
             data = self.__get_data(code)
+            if clear:
+                self.__clear_data(code)
             if data:
                 result = self.__add_data(code, data)
                 data.close()

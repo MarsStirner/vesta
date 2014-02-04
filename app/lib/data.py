@@ -259,3 +259,20 @@ class Dictionary(object):
             logger.error(error)
             raise RuntimeError(error)
         return True
+
+    def remove(self, find=None):
+        if find is None:
+            find = {}
+        if '_id' in find:
+            find['_id'] = ObjectId(find['_id'])
+        try:
+            self.collection.remove(find)
+        except TypeError, e:
+            error = u'Неверный тип параметров ({0})'.format(e)
+            logger.error(error)
+            raise TypeError(error)
+        except OperationFailure, e:
+            error = u'Операция удаления документа с id={0} не выполнена ({1})'.format(find, e)
+            logger.error(error)
+            raise RuntimeError(error)
+        return True
