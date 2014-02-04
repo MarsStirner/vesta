@@ -27,7 +27,7 @@ class MongoJsonEncoder(json.JSONEncoder):
 def jsonify(*args, **kwargs):
     """ jsonify with support for MongoDB ObjectId
     """
-    return Response(json.dumps(dict(*args, **kwargs), cls=MongoJsonEncoder), mimetype='application/json')
+    return Response(json.dumps(dict(*args, **kwargs), cls=MongoJsonEncoder, ensure_ascii=False), mimetype='application/json')
 
 logger = SimpleLogger.get_logger(SIMPLELOGS_URL,
                                  MODULE_NAME,

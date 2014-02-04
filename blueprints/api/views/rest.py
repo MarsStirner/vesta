@@ -275,7 +275,7 @@ class DictionaryAPI(MethodView, APIMixin):
 
 def _get_linked_dict(document, collection):
     # Если в документе задана привязка к справочнику - используем её
-    if 'linked_collection' in document:
+    if document and 'linked_collection' in document:
         obj_names = DictionaryNames()
         linked_dict = obj_names.get_by_code(document['linked_collection'])
         return linked_dict
@@ -297,8 +297,6 @@ def get_linked_data(code, field, field_value):
     obj = Dictionary(code)
     obj_names = DictionaryNames()
     document = obj.get_document({str(field): field_value})
-    if not document:
-        raise InvalidAPIUsage(u'Not found', status_code=404)
     try:
         origin_dict = obj_names.get_by_code(code)
         try:
@@ -365,8 +363,6 @@ def get_linked_data_hs(code, field, field_value):
     obj = Dictionary(code)
     obj_names = DictionaryNames()
     document = obj.get_document({str(field): field_value})
-    if not document:
-        raise InvalidAPIUsage(u'Not found', status_code=404)
     try:
         origin_dict = obj_names.get_by_code(code)
         try:

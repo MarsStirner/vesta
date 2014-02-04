@@ -99,6 +99,7 @@ def _get_linked_dict(document, collection):
     else:
         return linked_dict
 
+
 @module.route('/doc/edit/<code>/<_id>/', methods=['GET', 'POST'])
 def doc_edit(code, _id):
     dict_names = DictionaryNames()
