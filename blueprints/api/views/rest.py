@@ -377,8 +377,12 @@ def get_linked_data_hs(code, field, field_value):
         raise InvalidAPIUsage(e.message, status_code=400)
     except InvalidId, e:
         raise InvalidAPIUsage(e.message, status_code=404)
-    return make_response(vesta_jsonify(dict(oid=linked_dict['oid'],
-                                            data=_prepare_hs_response(document[linked_dict['code']]))), 200)
+    data = document.get(linked_dict['code'])
+    if data:
+        data = _prepare_hs_response(data)
+    else:
+        data = dict()
+    return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], data=data)), 200)
 
 
 @module.route('/hs/<code>/', methods=['POST'])
