@@ -176,12 +176,12 @@ class NSI_Data:
         obj.update_by_code(dictionary['code'], dict(version=version))
         self.msg.append(u'Обновляем версию справочника ({0}): {1}'.format(dictionary['code'], version))
 
-    def import_nsi_dictionaries(self, include=None, overwrite=False):
+    def import_nsi_dictionaries(self, exclude=None, overwrite=False):
         nsi_dicts = self.__get_dictionaries()
         if nsi_dicts:
             for dict_data in nsi_dicts:
                 nsi_dict = self.__prepare_dictionary(dict_data)
-                if isinstance(include, list) and nsi_dict['code'] not in include:
+                if isinstance(exclude, list) and nsi_dict['code'] in exclude:
                     continue
                 self.msg = list()
                 latest_version = self.__get_latest_version(nsi_dict)
