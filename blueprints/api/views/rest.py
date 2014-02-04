@@ -8,6 +8,8 @@ from app.lib.utils.tools import jsonify as vesta_jsonify, json
 from bson.objectid import InvalidId
 from ..app import module
 
+nsi_name_keys = ('name', 'name_short', 'descr', 'res_descr', 'mkb_name')
+
 
 def user_required(f):
     """Checks whether user is logged in or raises error 401."""
@@ -324,6 +326,67 @@ def _prepare_find(data):
 
 @module.route('/<code>/', methods=['POST'])
 def find_data(code):
+    data = APIMixin().parse_request(request)
+    obj = Dictionary(code)
+    obj_names = DictionaryNames()
+    try:
+        _dict = obj_names.get_by_code(code)
+        result = obj.get_document(_prepare_find(data))
+    except TypeError, e:
+        raise InvalidAPIUsage(e.message, status_code=400)
+    except InvalidId, e:
+        raise InvalidAPIUsage(e.message, status_code=404)
+    else:
+        ret_data = _dict
+        if not result:
+            ret_data.update(dict(data={}))
+            return make_response(vesta_jsonify(ret_data), 200)
+        ret_data.update(dict(data=result))
+    return make_response(vesta_jsonify(ret_data), 200)
+
+
+def _prepare_hs_response(data):
+    return_data = dict()
+    if 'code' in data:
+        return_data['code'] = data['code']
+    elif 'id' in data:
+        return_data['code'] = data['id']
+
+    for key in nsi_name_keys:
+        if key in data:
+            return_data['name'] = data[key]
+            break
+    return return_data
+
+
+@module.route('/hs/<code>/<field>/<field_value>/', methods=['GET'])
+def get_linked_data_hs(code, field, field_value):
+    # TODO: try-except
+    obj = Dictionary(code)
+    obj_names = DictionaryNames()
+    document = obj.get_document({str(field): field_value})
+    if not document:
+        raise InvalidAPIUsage(u'Not found', status_code=404)
+    try:
+        origin_dict = obj_names.get_by_code(code)
+        try:
+            linked_dict = _get_linked_dict(document, origin_dict)
+        except AttributeError:
+            raise InvalidAPIUsage(u'Not found', status_code=404)
+        except KeyError:
+            raise InvalidAPIUsage(u'Not found', status_code=404)
+        if not document:
+            return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], data={})), 200)
+    except TypeError, e:
+        raise InvalidAPIUsage(e.message, status_code=400)
+    except InvalidId, e:
+        raise InvalidAPIUsage(e.message, status_code=404)
+    return make_response(vesta_jsonify(dict(oid=linked_dict['oid'],
+                                            data=_prepare_hs_response(document[linked_dict['code']]))), 200)
+
+
+@module.route('/hs/<code>/', methods=['POST'])
+def find_data_hs(code):
     data = APIMixin().parse_request(request)
     obj = Dictionary(code)
     obj_names = DictionaryNames()
