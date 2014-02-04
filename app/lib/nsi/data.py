@@ -158,7 +158,7 @@ class NSI_Data:
         for version in nsi_dict_versions:
             _versions.append(self.__prepare_dictionary(version))
         try:
-            latest_version = _versions[0]
+            latest_version = _versions[len(_versions) - 1]
         except IndexError, e:
             self.msg.append(e)
             latest_version = None
