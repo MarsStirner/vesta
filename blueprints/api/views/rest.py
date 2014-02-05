@@ -360,31 +360,37 @@ def _prepare_hs_response(data):
 
 
 @module.route('/hs/<code>/<field>/<field_value>/', methods=['GET'])
-def get_linked_data_hs(code, field, field_value):
+def get_data_hs(code, field, field_value):
     # TODO: try-except
     obj = Dictionary(code)
     obj_names = DictionaryNames()
     document = obj.get_document({str(field): field_value})
-    try:
-        origin_dict = obj_names.get_by_code(code)
+    origin_dict = obj_names.get_by_code(code)
+    if 'oid' in origin_dict:
+        # Работаем с НСИ справочником
+        data = document
+        oid = origin_dict['oid']
+    else:
         try:
-            linked_dict = _get_linked_dict(document, origin_dict)
-        except AttributeError:
-            raise InvalidAPIUsage(u'Not found', status_code=404)
-        except KeyError:
-            raise InvalidAPIUsage(u'Not found', status_code=404)
-        if not document:
-            return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], message="not found")), 404)
-    except TypeError, e:
-        raise InvalidAPIUsage(e.message, status_code=400)
-    except InvalidId, e:
-        raise InvalidAPIUsage(e.message, status_code=404)
-    data = document.get(linked_dict['code'])
+            try:
+                linked_dict = _get_linked_dict(document, origin_dict)
+            except AttributeError:
+                raise InvalidAPIUsage(u'Not found', status_code=404)
+            except KeyError:
+                raise InvalidAPIUsage(u'Not found', status_code=404)
+            if not document:
+                return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], message="not found")), 404)
+        except TypeError, e:
+            raise InvalidAPIUsage(e.message, status_code=400)
+        except InvalidId, e:
+            raise InvalidAPIUsage(e.message, status_code=404)
+        data = document.get(linked_dict['code'])
+        oid = linked_dict['oid']
     if data:
         data = _prepare_hs_response(data)
     else:
         data = dict()
-    return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], data=data)), 200)
+    return make_response(vesta_jsonify(dict(oid=oid, data=data)), 200)
 
 
 @module.route('/hs/<code>/', methods=['POST'])
