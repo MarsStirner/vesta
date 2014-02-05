@@ -77,7 +77,7 @@ def dict_view(_id):
                                info=info,
                                data=data,
                                fields=fields,
-                               documents=collection.get_list(sort='id'))
+                               documents=collection.get_list(sort='id', limit=1000))
     except TemplateNotFound:
         abort(404)
 
