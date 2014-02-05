@@ -345,7 +345,9 @@ def find_data(code):
 
 def _prepare_hs_response(data):
     return_data = dict()
-    if 'code' in data:
+    if 'unq' in data:
+        return_data['code'] = data['unq']
+    elif 'code' in data:
         return_data['code'] = data['code']
     elif 'id' in data:
         return_data['code'] = data['id']
@@ -372,7 +374,7 @@ def get_linked_data_hs(code, field, field_value):
         except KeyError:
             raise InvalidAPIUsage(u'Not found', status_code=404)
         if not document:
-            return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], data={})), 200)
+            return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], message="not found")), 404)
     except TypeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
     except InvalidId, e:
