@@ -347,6 +347,8 @@ def _prepare_hs_response(data):
     return_data = dict()
     if 'unq' in data:
         return_data['code'] = data['unq']
+    elif 'mkb_code' in data:
+        return_data['code'] = data['mkb_code']
     elif 'code' in data:
         return_data['code'] = data['code']
     elif 'id' in data:
