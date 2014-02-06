@@ -353,6 +353,8 @@ def _prepare_hs_response(data):
         return_data['code'] = data['code']
     elif 'id' in data:
         return_data['code'] = data['id']
+    elif 'recid' in data:
+        return_data['code'] = data['recid']
 
     for key in nsi_name_keys:
         if key in data:
