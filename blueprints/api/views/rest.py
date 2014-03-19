@@ -343,7 +343,7 @@ def find_data(code):
     return make_response(vesta_jsonify(ret_data), 200)
 
 
-def _prepare_hs_response(data):
+def _prepare_hs_response(data, dict_code):
     return_data = dict()
     if 'unq' in data:
         return_data['code'] = data['unq']
@@ -360,6 +360,10 @@ def _prepare_hs_response(data):
         if key in data:
             return_data['name'] = data[key]
             break
+
+    # Для rbSocStatusType и MDN366 в поле code проставляется значение из id
+    if dict_code in ('rbSocStatusType', 'MDN366'):
+        return_data['code'] = data['id']
     return return_data
 
 
@@ -391,7 +395,7 @@ def get_data_hs(code, field, field_value):
         data = document.get(linked_dict['code'])
         oid = linked_dict['oid']
     if data:
-        data = _prepare_hs_response(data)
+        data = _prepare_hs_response(data, code)
     else:
         data = dict()
     return make_response(vesta_jsonify(dict(oid=oid, data=data)), 200)
