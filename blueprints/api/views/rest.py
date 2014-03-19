@@ -343,7 +343,7 @@ def find_data(code):
     return make_response(vesta_jsonify(ret_data), 200)
 
 
-def _prepare_hs_response(data, code):
+def _prepare_hs_response(data, dict_code, document):
     return_data = dict()
     if 'unq' in data:
         return_data['code'] = data['unq']
@@ -362,7 +362,9 @@ def _prepare_hs_response(data, code):
             break
 
     # Для rbSocStatusType и Organisation в поле code проставляется значение из id
-    if code in ('rbSocStatusType', 'Organisation'):
+    if dict_code == 'rbSocStatusType':
+        return_data['code'] = data['id']
+    elif dict_code == 'Organisation' and str(document.get('isInsurer', '0')) == '1':
         return_data['code'] = data['id']
     return return_data
 
@@ -395,7 +397,7 @@ def get_data_hs(code, field, field_value):
         data = document.get(linked_dict['code'])
         oid = linked_dict['oid']
     if data:
-        data = _prepare_hs_response(data, code)
+        data = _prepare_hs_response(data, code, document)
     else:
         data = dict()
     return make_response(vesta_jsonify(dict(oid=oid, data=data)), 200)
