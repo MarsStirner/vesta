@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy.sql import text
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from ..data import DictionaryNames, Dictionary
 from app.lib.utils.tools import logger
 from .db import connection, db_disconnect
-from bson import Timestamp
 
 
 class LPU_Data:
@@ -27,7 +26,7 @@ class LPU_Data:
             if isinstance(value, str) or isinstance(value, unicode):
                 value = value.strip()
             elif isinstance(value, timedelta):
-                value = Timestamp(value.total_seconds())
+                value = time(second=value.total_seconds())
             dictionary[key] = value
         return dictionary
 
