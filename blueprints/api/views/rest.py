@@ -266,7 +266,7 @@ class DictionaryAPI(MethodView, APIMixin):
 
     @classmethod
     def register(cls, mod):
-        url = '/dictionary/<string:code>/'
+        url = '/<string:code>/'
         f = cls.as_view('dictionary_api')
         mod.add_url_rule(url, view_func=f, methods=['GET'], defaults={'document_id': None})
         mod.add_url_rule(url, view_func=f, methods=['POST'])
@@ -322,7 +322,7 @@ def _prepare_find(data):
     return data
 
 
-@module.route('/<code>/', methods=['POST'])
+@module.route('/find/<code>/', methods=['POST'])
 def find_data(code):
     data = APIMixin().parse_request(request)
     obj = Dictionary(code)

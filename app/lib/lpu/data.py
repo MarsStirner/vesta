@@ -66,6 +66,12 @@ class LPU_Data:
         obj = Dictionary(code)
         obj.remove()
 
+    def get_rb_names(self):
+        result = list()
+        for row in connection.execute(text('SHOW TABLES LIKE "rb%"')):
+            result.append(row[0])
+        return result
+
     def import_lpu_dictionaries(self, dictionaries, clear=False):
         for code in dictionaries:
             self.msg = list()
