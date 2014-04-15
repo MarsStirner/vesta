@@ -26,7 +26,7 @@ class LPU_Data:
             if isinstance(value, str) or isinstance(value, unicode):
                 value = value.strip()
             elif isinstance(value, timedelta):
-                value = (datetime.min + value).strftime('%H:%M')
+                value = (datetime.min + value).time().isoformat()
             dictionary[key] = value
         return dictionary
 
