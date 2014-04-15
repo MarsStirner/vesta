@@ -45,7 +45,7 @@ class ClientsAPI(MethodView, APIMixin):
                 raise InvalidAPIUsage(e.message, status_code=400)
             except ValueError, e:
                 return vesta_jsonify(dict())
-            return vesta_jsonify(dict(result=list(result)))
+            return vesta_jsonify(dict(data=list(result)))
         else:
             # return Dictionary info by code
             result = collection.get_by_code(code)
@@ -124,7 +124,7 @@ class DictionaryNamesAPI(MethodView, APIMixin):
                 raise InvalidAPIUsage(e.message, status_code=400)
             except ValueError, e:
                 return vesta_jsonify(dict())
-            return vesta_jsonify(result=list(result))
+            return vesta_jsonify(data=list(result))
         else:
             # return Dictionary info by code
             result = collection.get_by_code(code)
@@ -205,7 +205,7 @@ class DictionaryAPI(MethodView, APIMixin):
             raise InvalidAPIUsage(e.message, status_code=404)
         except AttributeError, e:
             raise InvalidAPIUsage(e.message, status_code=400)
-        return vesta_jsonify(result)
+        return vesta_jsonify(data=list(result))
 
     def post(self, code):
         data = self.parse_request(request)
