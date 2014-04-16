@@ -79,6 +79,8 @@ class LPU_Data:
 
     def import_lpu_dictionaries(self, dictionaries, clear=False):
         for name, table in dictionaries.iteritems():
+            if not name.startswith(u'rb') or name.startswith(u'rb_'):
+                continue
             self.msg = list()
             data = self.__get_data(name)
             if clear:
