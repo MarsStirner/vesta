@@ -76,13 +76,13 @@ class LPU_Data:
         return meta.tables
 
     def import_lpu_dictionaries(self, dictionaries, clear=False):
-        for table in dictionaries:
+        for name, table in dictionaries.iteritems():
             self.msg = list()
-            data = self.__get_data(table.name)
+            data = self.__get_data(name)
             if clear:
-                self.__clear_data(table.name)
+                self.__clear_data(name)
             if data:
                 result = self.__add_data(table, data)
                 data.close()
-            logger.debug(u'\n'.join(self.msg), extra=dict(tags=['lpu', 'import', table.name]))
+            logger.debug(u'\n'.join(self.msg), extra=dict(tags=['lpu', 'import', name]))
         db_disconnect()
