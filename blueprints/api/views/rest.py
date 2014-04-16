@@ -199,6 +199,8 @@ class DictionaryAPI(MethodView, APIMixin):
 
     def document_by_field(self, code, field, field_value):
         obj = Dictionary(code)
+        if field == 'id':
+            field_value = int(field_value)
         try:
             result = obj.get_document({str(field): field_value})
         except TypeError, e:
@@ -207,7 +209,7 @@ class DictionaryAPI(MethodView, APIMixin):
             raise InvalidAPIUsage(e.message, status_code=404)
         else:
             if not result:
-                raise InvalidAPIUsage(u'Not found', status_code=404)
+                abort(404)
         return make_response(vesta_jsonify(dict(data=result)), 200)
 
     def list_documents(self, code, find=None):

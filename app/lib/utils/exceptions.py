@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from flask import jsonify, make_response
+from flask import Response, make_response
+from .tools import json
 from app.app import app
 
 
@@ -23,11 +24,13 @@ class InvalidAPIUsage(Exception):
 def handle_invalid_usage(error):
     meta = {'status': 'error'}
     meta.update(error.to_dict())
-    response = jsonify({'meta': meta})
-    response.status_code = error.status_code
-    return response
+    return Response(json.dumps({'meta': meta}, ensure_ascii=False, indent=0),
+                    mimetype='application/json',
+                    content_type='application/json; charset=utf-8', status=error.status_code)
 
 
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({'meta': {'status': 'error', 'message': 'Not found'}}), 404)
+    return Response(json.dumps({'meta': {'status': 'error', 'message': 'Not found'}}, ensure_ascii=False, indent=0),
+                    mimetype='application/json',
+                    content_type='application/json; charset=utf-8', status=404)
