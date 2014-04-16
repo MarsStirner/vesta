@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy.sql import text
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, date
 from bson import Binary
 from ..data import DictionaryNames, Dictionary
 from app.lib.utils.tools import logger
@@ -30,6 +30,8 @@ class LPU_Data:
                 value = value.strip()
             elif isinstance(value, timedelta):
                 value = (datetime.min + value).time().isoformat()
+            elif isinstance(value, date):
+                value = datetime.combine(value, datetime.min.time())
             dictionary[key] = value
         return dictionary
 
