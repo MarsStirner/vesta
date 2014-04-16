@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy.sql import text
 from datetime import datetime, timedelta, time
+from bson import Binary
 from ..data import DictionaryNames, Dictionary
 from app.lib.utils.tools import logger
-from .db import connection, db_disconnect
+from .db import connection, db_disconnect, meta
 
 
 class LPU_Data:
@@ -20,10 +21,12 @@ class LPU_Data:
         self.msg.append(u'Локальный справочник ({0}) не существует, создаём его'.format(code))
         return obj.add(dict(code=code))
 
-    def __prepare_document(self, row):
+    def __prepare_document(self, row, table):
         dictionary = dict()
         for key, value in row.items():
-            if isinstance(value, str) or isinstance(value, unicode):
+            if 'BLOB' in str(table.columns[key].type):
+                value = Binary(value)
+            elif isinstance(value, str) or isinstance(value, unicode):
                 value = value.strip()
             elif isinstance(value, timedelta):
                 value = (datetime.min + value).time().isoformat()
@@ -35,8 +38,9 @@ class LPU_Data:
 
     def __add_data(self, code, data):
         obj = Dictionary(code)
+        table = meta.tables[code]
         for row in data:
-            document = self.__prepare_document(row)
+            document = self.__prepare_document(row, table)
             existdocument = None
             if not document:
                 continue
@@ -75,6 +79,7 @@ class LPU_Data:
         return result
 
     def import_lpu_dictionaries(self, dictionaries, clear=False):
+        dictionaries = ['rbImageMap']
         for code in dictionaries:
             self.msg = list()
             data = self.__get_data(code)
