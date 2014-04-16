@@ -36,9 +36,9 @@ class LPU_Data:
     def __doc_info(self, document):
         return u', '.join([u'{0}: {1}'.format(key, value) for key, value in document.iteritems()])
 
-    def __add_data(self, code, data):
+    def __add_data(self, table, data):
+        code = table.name
         obj = Dictionary(code)
-        table = meta.tables[code]
         for row in data:
             document = self.__prepare_document(row, table)
             existdocument = None
@@ -73,19 +73,16 @@ class LPU_Data:
         obj.remove()
 
     def get_rb_names(self):
-        result = list()
-        for row in connection.execute(text('SHOW TABLES LIKE "rb%"')):
-            result.append(row[0])
-        return result
+        return meta.tables
 
     def import_lpu_dictionaries(self, dictionaries, clear=False):
-        for code in dictionaries:
+        for table in dictionaries:
             self.msg = list()
-            data = self.__get_data(code)
+            data = self.__get_data(table.name)
             if clear:
-                self.__clear_data(code)
+                self.__clear_data(table.name)
             if data:
-                result = self.__add_data(code, data)
+                result = self.__add_data(table, data)
                 data.close()
-            logger.debug(u'\n'.join(self.msg), extra=dict(tags=['lpu', 'import', code]))
+            logger.debug(u'\n'.join(self.msg), extra=dict(tags=['lpu', 'import', table.name]))
         db_disconnect()
