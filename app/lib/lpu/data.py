@@ -79,7 +79,6 @@ class LPU_Data:
         return result
 
     def import_lpu_dictionaries(self, dictionaries, clear=False):
-        dictionaries = ['rbImageMap']
         for code in dictionaries:
             self.msg = list()
             data = self.__get_data(code)
