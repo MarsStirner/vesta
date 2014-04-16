@@ -27,7 +27,10 @@ class MongoJsonEncoder(json.JSONEncoder):
 def jsonify(*args, **kwargs):
     """ jsonify with support for MongoDB ObjectId
     """
-    return Response(json.dumps(dict(*args, **kwargs), cls=MongoJsonEncoder, ensure_ascii=False, indent=0),
+    meta = {'meta': {'status': 'ok'}}
+    data = dict(*args, **kwargs)
+    data.update(meta)
+    return Response(json.dumps(data, cls=MongoJsonEncoder, ensure_ascii=False, indent=0),
                     mimetype='application/json',
                     content_type='application/json; charset=utf-8')
 

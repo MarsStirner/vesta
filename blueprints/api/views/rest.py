@@ -197,6 +197,19 @@ class DictionaryAPI(MethodView, APIMixin):
                 abort(404)
             return vesta_jsonify(result)
 
+    def document_by_field(self, code, field, field_value):
+        obj = Dictionary(code)
+        try:
+            result = obj.get_document({str(field): field_value})
+        except TypeError, e:
+            raise InvalidAPIUsage(e.message, status_code=400)
+        except InvalidId, e:
+            raise InvalidAPIUsage(e.message, status_code=404)
+        else:
+            if not result:
+                raise InvalidAPIUsage(u'Not found', status_code=404)
+        return make_response(vesta_jsonify(dict(data=result)), 200)
+
     def list_documents(self, code, find=None):
         obj = Dictionary(code)
         try:
@@ -266,11 +279,14 @@ class DictionaryAPI(MethodView, APIMixin):
 
     @classmethod
     def register(cls, mod):
-        url = '/<string:code>/'
+        url = '/v1/<string:code>/'
         f = cls.as_view('dictionary_api')
         mod.add_url_rule(url, view_func=f, methods=['GET'], defaults={'document_id': None})
         mod.add_url_rule(url, view_func=f, methods=['POST'])
         mod.add_url_rule('{0}<string:document_id>/'.format(url), view_func=f, methods=['GET', 'PUT', 'DELETE'])
+        mod.add_url_rule('{0}<string:field>/<string:field_value>/'.format(url),
+                         view_func=cls().document_by_field,
+                         methods=['GET'])
 
 
 def _get_linked_dict(document, collection):
