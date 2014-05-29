@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import re
 import datetime
 from bson.objectid import ObjectId
 from flask import Response
@@ -33,6 +34,15 @@ def jsonify(*args, **kwargs):
     return Response(json.dumps(data, cls=MongoJsonEncoder, ensure_ascii=False, indent=0),
                     mimetype='application/json',
                     content_type='application/json; charset=utf-8')
+
+
+def prepare_find_params(data):
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if isinstance(value, str) or isinstance(value, unicode):
+                data[key] = re.compile(value, re.IGNORECASE)
+    return data
+
 
 logger = SimpleLogger.get_logger(SIMPLELOGS_URL,
                                  MODULE_NAME,

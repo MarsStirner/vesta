@@ -13,6 +13,7 @@ def module_name():
     return dict(module_name=RUS_NAME)
 
 from .views.rest import *
+from .views.kladr import *
 
 ClientsAPI.register(module)
 DictionaryNamesAPI.register(module)

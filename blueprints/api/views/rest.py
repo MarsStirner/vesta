@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-import re
 from flask.views import MethodView
 from flask import g, make_response, abort, request
 from app.lib.utils.exceptions import InvalidAPIUsage
 from app.lib.data import Clients, DictionaryNames, Dictionary
-from app.lib.utils.tools import jsonify as vesta_jsonify, json
+from app.lib.utils.tools import jsonify as vesta_jsonify, json, prepare_find_params
 from bson.objectid import InvalidId
 from ..app import module
 
@@ -332,14 +331,6 @@ def get_linked_data(code, field, field_value):
     return make_response(vesta_jsonify(dict(oid=linked_dict['oid'], data=document[linked_dict['code']])), 200)
 
 
-def _prepare_find(data):
-    if isinstance(data, dict):
-        for key, value in data.items():
-            if isinstance(value, str) or isinstance(value, unicode):
-                data[key] = re.compile(value, re.IGNORECASE)
-    return data
-
-
 @module.route('/find/<code>/', methods=['POST'])
 def find_data(code):
     data = APIMixin().parse_request(request)
@@ -347,7 +338,7 @@ def find_data(code):
     obj_names = DictionaryNames()
     try:
         _dict = obj_names.get_by_code(code)
-        result = obj.get_document(_prepare_find(data))
+        result = obj.get_document(prepare_find_params(data))
     except TypeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
     except InvalidId, e:
@@ -426,7 +417,7 @@ def find_data_hs(code):
     obj_names = DictionaryNames()
     try:
         _dict = obj_names.get_by_code(code)
-        result = obj.get_document(_prepare_find(data))
+        result = obj.get_document(prepare_find_params(data))
     except TypeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
     except InvalidId, e:

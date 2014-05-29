@@ -133,6 +133,10 @@ class NSI_Data:
                     self.msg.append(u'Версии не совпадают, обновляем diff')
                     data = self.client.getRefbookUpdate(code=dictionary['code'], user_version=local_version['version'])
                     return self.__add_data(dictionary['code'], data)
+                else:
+                    self.msg.append(u'Локальная версия справочника: {0}'.format(local_version))
+                    self.msg.append(u'Актуальная версия справочника: {0}'.format(version))
+                    self.msg.append(u'Версии совпадают, не обновляем справочник')
             else:
                 self.msg.append(u'Локальная версия справочника не задана, импортируем данные')
                 obj.update(_id=local_dictionary['_id'], data=dictionary)
@@ -190,3 +194,11 @@ class NSI_Data:
                     self.__update_version(nsi_dict, latest_version)
                 if DEBUG:
                     logger.debug(u'\n'.join(self.msg), extra=dict(tags=['nsi', 'import', nsi_dict['code']]))
+
+    def create_indexes(self, collection_indexes):
+        if not isinstance(collection_indexes, dict):
+            return None
+        for collection, indexes in enumerate(collection_indexes):
+            obj = Dictionary(collection)
+            for field, index_type in enumerate(indexes):
+                obj.ensure_index(field, index_type)

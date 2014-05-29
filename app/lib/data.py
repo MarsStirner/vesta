@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from ..connectors import MongoConnection
 from pymongo.errors import *
+from pymongo import DESCENDING, ASCENDING, TEXT
 from bson.objectid import ObjectId, InvalidId
 from config import MODULE_NAME
 from config import MONGODB_DB
@@ -273,6 +274,23 @@ class Dictionary(object):
             raise TypeError(error)
         except OperationFailure, e:
             error = u'Операция удаления документа с id={0} не выполнена ({1})'.format(find, e)
+            logger.error(error)
+            raise RuntimeError(error)
+        return True
+
+    def ensure_index(self, field_name, index_type):
+        if index_type not in (ASCENDING, DESCENDING, TEXT):
+            error = u'Неверный тип индекса ({0})'.format(index_type)
+            logger.error(error)
+            raise TypeError(error)
+        try:
+            self.collection.ensure_index(field_name, index_type)
+        except TypeError, e:
+            error = u'Неверный тип параметров ({0})'.format(e)
+            logger.error(error)
+            raise TypeError(error)
+        except OperationFailure, e:
+            error = u'Операция создания индекса на поле ({0}) не выполнена ({1})'.format(field_name, e)
             logger.error(error)
             raise RuntimeError(error)
         return True
