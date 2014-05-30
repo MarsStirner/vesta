@@ -17,7 +17,7 @@ def get_city(value):
             '$or': [{'name': prepare_find_params(value)},
                     {'identcode': value}]}
     try:
-        result = obj.get_list(find)
+        result = obj.get_list(find, 'level')
     except ValueError, e:
         raise InvalidAPIUsage(e.message, status_code=404)
     except AttributeError, e:
