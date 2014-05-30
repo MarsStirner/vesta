@@ -10,14 +10,15 @@ STREET_CODE = 'STR172'
 
 
 @module.route('/kladr/city/<value>/', methods=['GET'])
+@module.route('/kladr/city/<value>/<int:limit>/', methods=['GET'])
 @crossdomain('*', methods=['GET'])
-def get_city(value):
+def get_city(value, limit=None):
     obj = Dictionary(CITY_CODE)
     find = {'is_actual': '1',
             '$or': [{'name': prepare_find_params(value)},
                     {'identcode': value}]}
     try:
-        result = obj.get_list(find, 'level')
+        result = obj.get_list(find, 'level', limit)
     except ValueError, e:
         raise InvalidAPIUsage(e.message, status_code=404)
     except AttributeError, e:
@@ -26,15 +27,16 @@ def get_city(value):
 
 
 @module.route('/kladr/street/<city_code>/<value>/', methods=['GET'])
+@module.route('/kladr/street/<city_code>/<value>/<int:limit>/', methods=['GET'])
 @crossdomain('*', methods=['GET'])
-def get_street(city_code, value):
+def get_street(city_code, value, limit=None):
     obj = Dictionary(STREET_CODE)
     find = {'identparent': city_code,
             'is_actual': '1',
             '$or': [{'name': prepare_find_params(value)},
                     {'identcode': value}]}
     try:
-        result = obj.get_list(find)
+        result = obj.get_list(find, limit=limit)
     except ValueError, e:
         raise InvalidAPIUsage(e.message, status_code=404)
     except AttributeError, e:
