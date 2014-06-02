@@ -202,3 +202,15 @@ class NSI_Data:
             obj = Dictionary(collection)
             for field, index_type in enumerate(indexes):
                 obj.ensure_index(field, index_type)
+
+
+def kladr_set_parents():
+    dictionary = Dictionary('KLD172')
+    for document in dictionary.get_list({'identparent': {'$ne': None}}):
+        parent = dictionary.get_document({'identcode': document['identparent']})
+        data = {'_id': document['_id']}
+        if parent:
+            data.update({'parent': parent['_id']})
+        else:
+            data.update({'parent': None})
+        dictionary.add_document(data)

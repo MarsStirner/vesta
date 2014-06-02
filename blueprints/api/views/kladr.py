@@ -13,16 +13,31 @@ STREET_CODE = 'STR172'
 @module.route('/kladr/city/<value>/<int:limit>/', methods=['GET'])
 @crossdomain('*', methods=['GET'])
 def get_city(value, limit=None):
+    result = list()
     obj = Dictionary(CITY_CODE)
     find = {'is_actual': '1',
             '$or': [{'name': prepare_find_params(value)},
                     {'identcode': value}]}
     try:
-        result = obj.get_list(find, 'level', limit)
+        cities = obj.get_list(find, 'level', limit)
     except ValueError, e:
         raise InvalidAPIUsage(e.message, status_code=404)
     except AttributeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
+    else:
+        for city in cities:
+            city['parents'] = []
+            if city['identparent']:
+                # TODO: заменить ['identparent'] на ['parent']
+                identparent = city['identparent']
+                level = int(city['level'])
+                for i in xrange(level - 1, 0, -1):
+                    if not identparent:
+                        break
+                    parent = obj.get_document({'identcode': identparent})
+                    city['parents'].append(parent)
+                    identparent = parent['identparent']
+            result.append(city)
     return jsonify(data=list(result))
 
 
