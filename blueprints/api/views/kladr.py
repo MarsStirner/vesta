@@ -9,10 +9,10 @@ CITY_CODE = 'KLD172'
 STREET_CODE = 'STR172'
 
 
-@module.route('/kladr/city/<value>/', methods=['GET'])
-@module.route('/kladr/city/<value>/<int:limit>/', methods=['GET'])
+@module.route('/kladr/city/search/<value>/', methods=['GET'])
+@module.route('/kladr/city/search/<value>/<int:limit>/', methods=['GET'])
 @crossdomain('*', methods=['GET'])
-def get_city(value, limit=None):
+def search_city(value, limit=None):
     result = list()
     obj = Dictionary(CITY_CODE)
     find = {'is_actual': '1',
@@ -41,10 +41,10 @@ def get_city(value, limit=None):
     return jsonify(data=list(result))
 
 
-@module.route('/kladr/street/<city_code>/<value>/', methods=['GET'])
-@module.route('/kladr/street/<city_code>/<value>/<int:limit>/', methods=['GET'])
+@module.route('/kladr/street/search/<city_code>/<value>/', methods=['GET'])
+@module.route('/kladr/street/search/<city_code>/<value>/<int:limit>/', methods=['GET'])
 @crossdomain('*', methods=['GET'])
-def get_street(city_code, value, limit=None):
+def search_street(city_code, value, limit=None):
     obj = Dictionary(STREET_CODE)
     find = {'identparent': city_code,
             'is_actual': '1',
@@ -52,6 +52,34 @@ def get_street(city_code, value, limit=None):
                     {'identcode': value}]}
     try:
         result = obj.get_list(find, limit=limit)
+    except ValueError, e:
+        raise InvalidAPIUsage(e.message, status_code=404)
+    except AttributeError, e:
+        raise InvalidAPIUsage(e.message, status_code=400)
+    return jsonify(data=list(result))
+
+
+@module.route('/kladr/city/<code>/', methods=['GET'])
+@crossdomain('*', methods=['GET'])
+def get_city(code):
+    obj = Dictionary(CITY_CODE)
+    find = {'identcode': code}
+    try:
+        result = obj.get_list(find)
+    except ValueError, e:
+        raise InvalidAPIUsage(e.message, status_code=404)
+    except AttributeError, e:
+        raise InvalidAPIUsage(e.message, status_code=400)
+    return jsonify(data=list(result))
+
+
+@module.route('/kladr/street/<code>/', methods=['GET'])
+@crossdomain('*', methods=['GET'])
+def get_street(code):
+    obj = Dictionary(STREET_CODE)
+    find = {'identcode': code}
+    try:
+        result = obj.get_list(find)
     except ValueError, e:
         raise InvalidAPIUsage(e.message, status_code=404)
     except AttributeError, e:
