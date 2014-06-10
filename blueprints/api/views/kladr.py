@@ -81,10 +81,9 @@ def _set_cities_parents(cities):
     result = []
     for city in cities:
         city['parents'] = []
-        if city['parent'] or city['identparent']:
-            # TODO: заменить ['identparent'] на ['parent']
-            identparent = city['identparent']
-            parent = city.get('parent')
+        identparent = city['identparent']
+        parent = city.get('parent')
+        if identparent or parent:
             level = int(city['level'])
             for i in xrange(level - 1, 0, -1):
                 if parent:
