@@ -200,7 +200,7 @@ class Dictionary(object):
             raise TypeError(error)
         return result
 
-    def get_list(self, find=None, sort=None, limit=None):
+    def get_list(self, find=None, sort=None, limit=None, skip=None):
         if not self.collection.name in self.db.collection_names():
             error = u'Коллекция не существует ({0})'.format(self.collection.name)
             logger.error(error)
@@ -216,6 +216,8 @@ class Dictionary(object):
             cursor = self.collection.find()
         if limit:
             cursor = cursor.limit(limit)
+        if skip:
+            cursor = cursor.skip(skip)
         if sort:
             cursor = cursor.sort(sort)
         return cursor

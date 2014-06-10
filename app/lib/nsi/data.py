@@ -206,11 +206,18 @@ class NSI_Data:
 
 def kladr_set_parents():
     dictionary = Dictionary('KLD172')
-    for document in dictionary.get_list({'identparent': {'$ne': None}}):
-        parent = dictionary.get_document({'identcode': document['identparent']})
-        data = {'_id': document['_id']}
-        if parent:
-            data.update({'parent': parent['_id']})
-        else:
-            data.update({'parent': None})
-        dictionary.add_document(data)
+    limit = 1000
+    for i in xrange(0, 300):
+        print i
+        documents = list(dictionary.get_list({'identparent': {'$ne': None}}, limit=limit, skip=i*limit))
+        if not documents:
+            break
+        for document in documents:
+            # print document['identcode']
+            parent = dictionary.get_document({'identcode': document['identparent']})
+            data = {'_id': document['_id']}
+            if parent:
+                data.update({'parent': parent['_id']})
+            else:
+                data.update({'parent': None})
+            dictionary.add_document(data)

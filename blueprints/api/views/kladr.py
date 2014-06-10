@@ -13,7 +13,6 @@ STREET_CODE = 'STR172'
 @module.route('/kladr/city/search/<value>/<int:limit>/', methods=['GET'])
 @crossdomain('*', methods=['GET'])
 def search_city(value, limit=None):
-    result = list()
     obj = Dictionary(CITY_CODE)
     find = {'is_actual': '1',
             '$or': [{'name': prepare_find_params(value)},
@@ -25,19 +24,7 @@ def search_city(value, limit=None):
     except AttributeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
     else:
-        for city in cities:
-            city['parents'] = []
-            if city['identparent']:
-                # TODO: заменить ['identparent'] на ['parent']
-                identparent = city['identparent']
-                level = int(city['level'])
-                for i in xrange(level - 1, 0, -1):
-                    if not identparent:
-                        break
-                    parent = obj.get_document({'identcode': identparent})
-                    city['parents'].append(parent)
-                    identparent = parent['identparent']
-            result.append(city)
+        result = _set_cities_parents(cities)
     return jsonify(data=list(result))
 
 
@@ -65,11 +52,13 @@ def get_city(code):
     obj = Dictionary(CITY_CODE)
     find = {'identcode': code}
     try:
-        result = obj.get_list(find)
+        cities = obj.get_list(find)
     except ValueError, e:
         raise InvalidAPIUsage(e.message, status_code=404)
     except AttributeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
+    else:
+        result = _set_cities_parents(cities)
     return jsonify(data=list(result))
 
 
@@ -85,3 +74,27 @@ def get_street(code):
     except AttributeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
     return jsonify(data=list(result))
+
+
+def _set_cities_parents(cities):
+    obj = Dictionary(CITY_CODE)
+    result = []
+    for city in cities:
+        city['parents'] = []
+        if city['parent'] or city['identparent']:
+            # TODO: заменить ['identparent'] на ['parent']
+            identparent = city['identparent']
+            parent = city.get('parent')
+            level = int(city['level'])
+            for i in xrange(level - 1, 0, -1):
+                if parent:
+                    parent_city = obj.get_document({'_id': parent})
+                elif identparent:
+                    parent_city = obj.get_document({'identcode': identparent})
+                else:
+                    break
+                city['parents'].append(parent_city)
+                parent = parent_city.get('parent')
+                identparent = parent_city['identparent']
+        result.append(city)
+    return result
