@@ -4,5 +4,6 @@ requests
 simplejson
 suds
 sqlalchemy
+Flask-Cache
 mysql-python
 -e git+https://github.com/KorusConsulting/pysimplelogs.git#egg=pysimplelogs

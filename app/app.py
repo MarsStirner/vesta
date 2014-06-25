@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 from flask import Flask
+from flask.ext.cache import Cache
 import config
 
 app = Flask(__name__)
 app.config.from_object(config)
+cache = Cache(config={'CACHE_TYPE': 'simple'})
+cache.init_app(app)
 
 from blueprints.admin.app import module as admin
 from blueprints.api.app import module as api
