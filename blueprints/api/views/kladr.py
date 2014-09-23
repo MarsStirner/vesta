@@ -37,7 +37,7 @@ def search_city(value, limit=None):
 def search_city_country(value, limit=None):
     obj = Dictionary(CITY_CODE)
     find = {'is_actual': '1',
-            'shorttype': {'$in': [u'г', u'с', u'п']},
+            'shorttype': {'$in': [u'г', u'с', u'п', u'рп', u'нп']},
             '$or': [{'name': prepare_find_params(value)},
                     {'identcode': value}]}
     try:
