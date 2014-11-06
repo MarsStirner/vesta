@@ -90,3 +90,6 @@ class LPU_Data:
                 data.close()
             logger.debug(u'\n'.join(self.msg), extra=dict(tags=['lpu', 'import', name]))
         db_disconnect()
+
+    def import_risar_dictionaries(self, clear=False):
+        pass

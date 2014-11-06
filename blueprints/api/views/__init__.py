@@ -1,1 +1,1 @@
-__author__ = 'santipov'
+__all__ = ['clients', 'dict_names', 'dictionary', 'kladr', 'hs', 'nsi']

@@ -12,9 +12,4 @@ module = Blueprint(MODULE_NAME, __name__,
 def module_name():
     return dict(module_name=RUS_NAME)
 
-from .views.rest import *
-from .views.kladr import *
-
-ClientsAPI.register(module)
-DictionaryNamesAPI.register(module)
-DictionaryAPI.register(module)
+from .views import *
