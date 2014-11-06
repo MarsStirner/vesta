@@ -90,28 +90,27 @@ def crossdomain(origin=None, methods=None, headers=None,
     return decorator
 
 
-from .exceptions import InvalidAPIUsage
+logger = SimpleLogger.get_logger(SIMPLELOGS_URL,
+                                 MODULE_NAME,
+                                 dict(name=MODULE_NAME, version=version),
+                                 DEBUG)
 
 
 def parse_request(_request):
-        data = _request.get_json()
-        if not data:
-            data = json.loads(_request.data)
-        if not data:
-            raise InvalidAPIUsage(u'Не переданы данные, или переданы неверным методом', 400)
-        return data
+    data = _request.get_json()
+    if not data:
+        data = json.loads(_request.data)
+    if not data:
+        from .exceptions import InvalidAPIUsage
+        raise InvalidAPIUsage(u'Не переданы данные, или переданы неверным методом', 400)
+    return data
 
 
 def user_required(f):
     """Checks whether user is logged in or raises error 401."""
     def decorator(*args, **kwargs):
         if not g.user:
+            from .exceptions import InvalidAPIUsage
             raise InvalidAPIUsage(u'Необходимо авторизовать клиента', status_code=401)
         return f(*args, **kwargs)
     return decorator
-
-
-logger = SimpleLogger.get_logger(SIMPLELOGS_URL,
-                                 MODULE_NAME,
-                                 dict(name=MODULE_NAME, version=version),
-                                 DEBUG)

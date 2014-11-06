@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy.sql import text
+from sqlalchemy import MetaData
 from datetime import datetime, timedelta, date
 from bson import Binary
 from ..data import DictionaryNames, Dictionary
 from app.lib.utils.tools import logger
-from .db import connection, db_disconnect, meta
+from .db import connection, db_disconnect, engine
 
 
 class LPU_Data:
@@ -16,10 +16,13 @@ class LPU_Data:
         obj = DictionaryNames()
         return obj.get_by_code(code)
 
-    def __add_dictionary(self, code):
+    def __add_dictionary(self, code, name=None):
         obj = DictionaryNames()
         self.msg.append(u'Локальный справочник ({0}) не существует, создаём его'.format(code))
-        return obj.add(dict(code=code))
+        data = dict(code=code)
+        if name:
+            data.update({'name': name})
+        return obj.add(data)
 
     def __prepare_document(self, row, table):
         dictionary = dict()
@@ -75,6 +78,10 @@ class LPU_Data:
         obj.remove()
 
     def get_rb_names(self):
+        meta = MetaData(engine)
+        meta.reflect(bind=engine, views=True,
+                     only=lambda name, obj: name.startswith(u'MKB') or name.startswith(u'rb') and not name.startswith(u'rb_'))
+
         return meta.tables
 
     def import_lpu_dictionaries(self, dictionaries, clear=False):
@@ -92,4 +99,28 @@ class LPU_Data:
         db_disconnect()
 
     def import_risar_dictionaries(self, clear=False):
-        pass
+        risar_rbs = connection.execute(
+            'SELECT code, name, valueDomain '
+            'FROM hospital1.ActionPropertyType '
+            'WHERE actionType_id = 4515  and deleted = 0 and valueDomain != "";')
+        for row in risar_rbs:
+            code = u'rbRisar{0}'.format(row['code'].title())
+            name = row['name']
+            values = [{'name': val.strip("'").strip()} for val in row['valueDomain'].split(',')]
+            local_dictionary = self.__get_local_dictionary(code)
+            if clear:
+                self.__clear_data(code)
+            if not local_dictionary:
+                self.__add_dictionary(code, name)
+            obj = Dictionary(code)
+            for document in values:
+                try:
+                    result = obj.add_document(document)
+                except AttributeError, e:
+                    logger.error(
+                        self.msg.append(u'Ошибка импорта документа ({0}): {1}'.format(self.__doc_info(document), e)),
+                        extra=dict(tags=['lpu', 'import error']))
+                    return False
+            self.msg.append(u'Справочник ({0}) обновлён'.format(code))
+        logger.debug(u'\n'.join(self.msg), extra=dict(tags=['risar', 'import']))
+        db_disconnect()
