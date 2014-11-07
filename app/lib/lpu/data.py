@@ -98,6 +98,12 @@ class LPU_Data:
             logger.debug(u'\n'.join(self.msg), extra=dict(tags=['lpu', 'import', name]))
         db_disconnect()
 
+    def _transliterate(self, str):
+        symbols = (u"абвгдеёжзийклмнопрстуфхцчшщъыьэюя, ",
+                   u"abvgdeejzijklmnoprstufhzcss_y_eua__")
+        tr = dict([(ord(a), ord(b)) for (a, b) in zip(*symbols)])
+        return str.translate(tr)
+
     def import_risar_dictionaries(self, clear=False):
         risar_rbs = connection.execute(
             'SELECT code, name, valueDomain '
@@ -106,7 +112,9 @@ class LPU_Data:
         for row in risar_rbs:
             code = u'rbRisar{0}'.format(row['code'].title())
             name = row['name']
-            values = [{'name': val.strip("'").strip()} for val in row['valueDomain'].split("',")]
+            values = [{'name': val.strip("'").strip(),
+                       'code': self._transliterate(val.strip("'").strip().replace(',', '').replace(' ', ''))}
+                      for val in row['valueDomain'].split("',")]
             local_dictionary = self.__get_local_dictionary(code)
             if clear:
                 self.__clear_data(code)
