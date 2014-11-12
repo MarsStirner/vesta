@@ -107,8 +107,8 @@ class LPU_Data:
     def import_risar_dictionaries(self, clear=False):
         risar_rbs = connection.execute(
             'SELECT code, name, valueDomain '
-            'FROM hospital1.ActionPropertyType '
-            'WHERE (actionType_id = 4515 OR actionType_id = 4516 OR actionType_id = 4513 OR actionType_id = 4512) and deleted = 0 and valueDomain != "";')
+            'FROM ActionPropertyType '
+            'WHERE (actionType_id = 4516 OR actionType_id = 4513 OR actionType_id = 4512) and deleted = 0 and valueDomain != "";')
         for row in risar_rbs:
             code = u'rbRisar{0}'.format(row['code'].title())
             name = row['name']
