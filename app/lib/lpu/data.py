@@ -112,8 +112,8 @@ class LPU_Data:
         for row in risar_rbs:
             code = u'rbRisar{0}'.format(row['code'].title())
             name = row['name']
-            values = [{'name': val.strip("'").strip(),
-                       'code': self._transliterate(val.strip("'").strip().replace(',', '').replace(' ', ''))}
+            values = [{'name': val.strip().strip("'").strip('"').strip(),
+                       'code': self._transliterate(val.strip().strip("'").strip('"').strip().replace(',', '').replace(' ', ''))}
                       for val in row['valueDomain'].split("',")]
             local_dictionary = self.__get_local_dictionary(code)
             if clear:
