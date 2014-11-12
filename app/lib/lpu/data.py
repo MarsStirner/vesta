@@ -108,7 +108,7 @@ class LPU_Data:
         risar_rbs = connection.execute(
             'SELECT code, name, valueDomain '
             'FROM hospital1.ActionPropertyType '
-            'WHERE actionType_id = 4515  and deleted = 0 and valueDomain != "";')
+            'WHERE (actionType_id = 4515 OR actionType_id = 4516 OR actionType_id = 4513 OR actionType_id = 4512) and deleted = 0 and valueDomain != "";')
         for row in risar_rbs:
             code = u'rbRisar{0}'.format(row['code'].title())
             name = row['name']
