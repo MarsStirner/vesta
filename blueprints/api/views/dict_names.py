@@ -30,8 +30,23 @@ def dictionaries_get(code=None):
         # return Dictionary info by code
         result = collection.get_by_code(code)
         if result is None:
-            result = dict()
+            raise InvalidAPIUsage(u'По коду {0} ничего не найдено'.format(code), status_code=404)
         return jsonify(result)
+
+
+@module.route(base_url + 'find/', methods=['POST'])
+@crossdomain('*', methods=['POST'])
+def dictionaries_find():
+    """Поиск информации о справочнике"""
+    data = parse_request(request)
+    obj = DictionaryNames()
+    try:
+        result = obj.get_list(data)
+    except TypeError, e:
+        raise InvalidAPIUsage(e.message, status_code=400)
+    except ValueError, e:
+        return jsonify(dict())
+    return jsonify(data=list(result))
 
 
 @module.route(base_url, methods=['POST'])

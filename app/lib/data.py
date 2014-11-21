@@ -73,11 +73,13 @@ class DictionaryNames(object):
     def add(self, data):
         result = None
         if data is not None and isinstance(data, dict):
-            document = self.dictionary.get_document(data)
+            document = self.get_by_code(data['code'])
             if not document:
                 result = self.dictionary.add_document(data)
             else:
-                return document.get('_id', None)
+                error = u'Справочник с таким кодом ({0}) уже существует'.format(data['code'])
+                logger.error(error)
+                raise TypeError(error)
         return result
 
     def update(self, _id, data):

@@ -25,7 +25,7 @@ def dictionary_get(code, document_id=None):
         result = document_details(code, document_id)
         if not result:
             abort(404)
-        return jsonify(result)
+        return jsonify(data=result)
 
 
 def list_documents(code, find=None):
