@@ -29,8 +29,8 @@ def dictionary_get(code, document_id=None):
 
 
 def list_documents(code, find=None):
-    obj = Dictionary(code)
     try:
+        obj = Dictionary(code)
         result = obj.get_list(find)
     except ValueError, e:
         raise InvalidAPIUsage(e.message, status_code=404)
@@ -40,9 +40,9 @@ def list_documents(code, find=None):
 
 
 def document_details(code, document_id):
-    obj = Dictionary(code)
-    #TODO: учесть auth_token
     try:
+        obj = Dictionary(code)
+        #TODO: учесть auth_token
         result = obj.get_document(dict(_id=document_id))
     except TypeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
@@ -54,10 +54,10 @@ def document_details(code, document_id):
 @module.route(base_url + '<string:field>/<string:field_value>/', methods=['GET'])
 @crossdomain('*', methods=['GET'])
 def document_by_field(code, field, field_value):
-    obj = Dictionary(code)
     if field == 'id':
         field_value = int(field_value)
     try:
+        obj = Dictionary(code)
         result = obj.get_document({str(field): field_value})
     except TypeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
@@ -73,8 +73,8 @@ def document_by_field(code, field, field_value):
 @crossdomain('*', methods=['POST'])
 def dictionary_post(code):
     data = parse_request(request)
-    obj = Dictionary(code)
     try:
+        obj = Dictionary(code)
         _id = obj.add_documents(data)
     except TypeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
@@ -94,8 +94,8 @@ def dictionary_post(code):
 @crossdomain('*', methods=['PUT'])
 def dictionary_put(code, document_id):
     data = parse_request(request)
-    obj = Dictionary(code)
     try:
+        obj = Dictionary(code)
         exists = obj.exists(dict(_id=document_id))
     except TypeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
@@ -114,8 +114,8 @@ def dictionary_put(code, document_id):
 @module.route(base_url + '<document_id>/', methods=['DELETE'])
 @crossdomain('*', methods=['DELETE'])
 def dictionary_delete(code, document_id):
-    obj = Dictionary(code)
     try:
+        obj = Dictionary(code)
         obj.delete(_id=document_id)
     except TypeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
@@ -128,9 +128,9 @@ def dictionary_delete(code, document_id):
 @crossdomain('*', methods=['POST'])
 def find_data(code):
     data = parse_request(request)
-    obj = Dictionary(code)
     obj_names = DictionaryNames()
     try:
+        obj = Dictionary(code)
         _dict = obj_names.get_by_code(code)
         result = obj.get_document(prepare_find_params(data))
     except TypeError, e:

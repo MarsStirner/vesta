@@ -119,7 +119,10 @@ class Dictionary(object):
     def __init__(self, code):
         self.db_client, self.db = MongoConnection.provider(MONGODB_DB)
         self.code = code
-        self.collection = self.db[code]
+        try:
+            self.collection = self.db[code]
+        except InvalidName as e:
+            raise AttributeError(e.message)
         self._dict_name_exists = None # TODO: понять необходимость этого свойства
 
     @property
