@@ -132,7 +132,7 @@ def find_data(code):
     try:
         obj = Dictionary(code)
         _dict = obj_names.get_by_code(code)
-        result = obj.get_document(prepare_find_params(data))
+        result = obj.get_list(prepare_find_params(data))
     except TypeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
     except InvalidId, e:
