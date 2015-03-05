@@ -142,5 +142,5 @@ def find_data(code):
         if not result:
             ret_data.update(dict(data={}))
             return make_response(jsonify(ret_data), 200)
-        ret_data.update(dict(data=result))
+        ret_data.update(dict(data=list(result)))
     return make_response(jsonify(ret_data), 200)
