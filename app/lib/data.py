@@ -206,7 +206,7 @@ class Dictionary(object):
         return result
 
     def get_list(self, find=None, sort=None, limit=None, skip=None):
-        if not self.collection.name in self.db.collection_names():
+        if self.collection.name not in self.db.collection_names():
             error = u'Коллекция не существует ({0})'.format(self.collection.name)
             logger.error(error)
             raise ValueError(error)

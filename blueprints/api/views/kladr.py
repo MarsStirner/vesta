@@ -51,21 +51,24 @@ def search_city_country(value, limit=None):
     return jsonify(data=list(result))
 
 
+@module.route('/kladr/street/search/<city_code>/', methods=['GET'])
 @module.route('/kladr/street/search/<city_code>/<value>/', methods=['GET'])
 @module.route('/kladr/street/search/<city_code>/<value>/<int:limit>/', methods=['GET'])
 @crossdomain('*', methods=['GET'])
 @cache.memoize(86400)
-def search_street(city_code, value, limit=None):
+def search_street(city_code, value=None, limit=None):
     obj = Dictionary(STREET_CODE)
-    prepared = prepare_find_params(value)
     find = {'identparent': city_code,
-            'is_actual': '1',
+            'is_actual': '1'}
+    if value:
+        prepared = prepare_find_params(value)
+        find.update({
             '$or': [{'name': prepared},
                     {'fulltype': prepared},
                     {'shorttype': prepared},
-                    {'identcode': value}]}
+                    {'identcode': value}]})
     try:
-        result = obj.get_list(find, limit=limit)
+        result = obj.get_list(find, limit=limit, sort='name')
     except ValueError, e:
         raise InvalidAPIUsage(e.message, status_code=404)
     except AttributeError, e:
