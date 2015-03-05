@@ -10,7 +10,7 @@ obj = NSI_Data()
 # obj.import_nsi_dictionaries(['KLD172'])
 obj.import_nsi_dictionaries()
 
-obj.create_indexes({'KLD172':[{'name': TEXT, 'level': ASCENDING}],
-                    'STR172':[{'name': TEXT}]})
+obj.create_indexes({'KLD172': [{'name': TEXT, 'level': ASCENDING}, {'identcode': ASCENDING}],
+                    'STR172': [{'name': TEXT}, {'identcode': ASCENDING}, {'identparent': ASCENDING}]})
 
 kladr_set_parents()

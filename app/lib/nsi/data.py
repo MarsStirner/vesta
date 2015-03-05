@@ -198,10 +198,13 @@ class NSI_Data:
     def create_indexes(self, collection_indexes):
         if not isinstance(collection_indexes, dict):
             return None
-        for collection, indexes in enumerate(collection_indexes):
+        for collection, indexes in collection_indexes.items():
             obj = Dictionary(collection)
-            for field, index_type in enumerate(indexes):
-                obj.ensure_index(field, index_type)
+            if not isinstance(indexes, list):
+                indexes = [indexes]
+            for index in indexes:
+                for field, index_type in index.items():
+                    obj.ensure_index(field, index_type)
 
 
 def kladr_set_parents():
