@@ -132,3 +132,59 @@ class LPU_Data:
             self.msg.append(u'Справочник ({0}) обновлён'.format(code))
         logger.debug(u'\n'.join(self.msg), extra=dict(tags=['risar', 'import']))
         db_disconnect()
+
+    def add_risar_dicts(self, clear=False):
+        code = 'rbRisarFertilizationMethod'
+        name = u'Способ оплодотворения'
+        local_dictionary = self.__get_local_dictionary(code)
+        if clear:
+            self.__clear_data(code)
+        if not local_dictionary:
+            self.__add_dictionary(code, name)
+        obj = Dictionary(code)
+        data = [{'code': 'natural', 'name': u'Естественный'},
+                {'code': 'ism', 'name': u'ИСМ'},
+                {'code': 'eko', 'name': u'ЭКО'},
+                {'code': 'gift', 'name': u'ГИФТ'},
+                {'code': 'zift', 'name': u'ЗИФТ'},
+                {'code': 'iksi', 'name': u'ИКСИ'}]
+        for document in data:
+            try:
+                result = obj.add_document(document)
+            except AttributeError, e:
+                logger.error(
+                    self.msg.append(u'Ошибка импорта документа ({0}): {1}'.format(self.__doc_info(document), e)),
+                    extra=dict(tags=['lpu', 'import error']))
+                return False
+        self.msg.append(u'Справочник ({0}) обновлён'.format(code))
+        logger.debug(u'\n'.join(self.msg), extra=dict(tags=['risar', 'import']))
+
+        code = 'rbRisarPreviousPregnancy'
+        name = u'Информация о предыдущих беременностях'
+        local_dictionary = self.__get_local_dictionary(code)
+        if clear:
+            self.__clear_data(code)
+        if not local_dictionary:
+            self.__add_dictionary(code, name)
+        obj = Dictionary(code)
+        data = [{'code': 'normal', 'name': u'Роды в срок'},
+                {'code': 'miscarriage37', 'name': u'Преждеверменные роды 28-37 недель'},
+                {'code': 'miscarriage27', 'name': u'Преждеверменные роды 22-27 недель'},
+                {'code': 'med_abortion12', 'name': u'Медицинский аборт до 12 недель'},
+                {'code': 'med_abortion', 'name': u'Аборт по мед. показаниям'},
+                {'code': 'misbirth11', 'name': u'Самопроизвольный выкидыш до 11 недель'},
+                {'code': 'misbirth21', 'name': u'Самопроизвольный выкидыш 12-21 недель'},
+                {'code': 'misbirth', 'name': u'Неуточненный выкидыш'},
+                {'code': 'belated_birth', 'name': u'Запоздалые роды'}]
+        for document in data:
+            try:
+                result = obj.add_document(document)
+            except AttributeError, e:
+                logger.error(
+                    self.msg.append(u'Ошибка импорта документа ({0}): {1}'.format(self.__doc_info(document), e)),
+                    extra=dict(tags=['lpu', 'import error']))
+                return False
+        self.msg.append(u'Справочник ({0}) обновлён'.format(code))
+        logger.debug(u'\n'.join(self.msg), extra=dict(tags=['risar', 'import']))
+
+        db_disconnect()
