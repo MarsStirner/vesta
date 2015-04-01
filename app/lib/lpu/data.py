@@ -134,48 +134,95 @@ class LPU_Data:
         db_disconnect()
 
     def add_risar_dicts(self, clear=False):
-        code = 'rbRisarFertilizationMethod'
-        name = u'Способ оплодотворения'
-        local_dictionary = self.__get_local_dictionary(code)
-        if clear:
-            self.__clear_data(code)
-        if not local_dictionary:
-            self.__add_dictionary(code, name)
-        obj = Dictionary(code)
-        data = [{'code': 'natural', 'name': u'Естественный'},
-                {'code': 'ism', 'name': u'ИСМ'},
-                {'code': 'eko', 'name': u'ЭКО'},
-                {'code': 'gift', 'name': u'ГИФТ'},
-                {'code': 'zift', 'name': u'ЗИФТ'},
-                {'code': 'iksi', 'name': u'ИКСИ'}]
-        for document in data:
-            try:
-                result = obj.add_document(document)
-            except AttributeError, e:
-                logger.error(
-                    self.msg.append(u'Ошибка импорта документа ({0}): {1}'.format(self.__doc_info(document), e)),
-                    extra=dict(tags=['lpu', 'import error']))
-                return False
-        self.msg.append(u'Справочник ({0}) обновлён'.format(code))
-        logger.debug(u'\n'.join(self.msg), extra=dict(tags=['risar', 'import']))
+        # code = 'rbRisarFertilizationMethod'
+        # name = u'Способ оплодотворения'
+        # local_dictionary = self.__get_local_dictionary(code)
+        # if clear:
+        #     self.__clear_data(code)
+        # if not local_dictionary:
+        #     self.__add_dictionary(code, name)
+        # obj = Dictionary(code)
+        # data = [{'code': 'natural', 'name': u'Естественный'},
+        #         {'code': 'ism', 'name': u'ИСМ'},
+        #         {'code': 'eko', 'name': u'ЭКО'},
+        #         {'code': 'gift', 'name': u'ГИФТ'},
+        #         {'code': 'zift', 'name': u'ЗИФТ'},
+        #         {'code': 'iksi', 'name': u'ИКСИ'}]
+        # for document in data:
+        #     try:
+        #         result = obj.add_document(document)
+        #     except AttributeError, e:
+        #         logger.error(
+        #             self.msg.append(u'Ошибка импорта документа ({0}): {1}'.format(self.__doc_info(document), e)),
+        #             extra=dict(tags=['lpu', 'import error']))
+        #         return False
+        # self.msg.append(u'Справочник ({0}) обновлён'.format(code))
+        # logger.debug(u'\n'.join(self.msg), extra=dict(tags=['risar', 'import']))
+        #
+        # code = 'rbRisarPreviousPregnancy'
+        # name = u'Информация о предыдущих беременностях'
+        # local_dictionary = self.__get_local_dictionary(code)
+        # if clear:
+        #     self.__clear_data(code)
+        # if not local_dictionary:
+        #     self.__add_dictionary(code, name)
+        # obj = Dictionary(code)
+        # data = [{'code': 'normal', 'name': u'Роды в срок'},
+        #         {'code': 'miscarriage37', 'name': u'Преждеверменные роды 28-37 недель'},
+        #         {'code': 'miscarriage27', 'name': u'Преждеверменные роды 22-27 недель'},
+        #         {'code': 'med_abortion12', 'name': u'Медицинский аборт до 12 недель'},
+        #         {'code': 'med_abortion', 'name': u'Аборт по мед. показаниям'},
+        #         {'code': 'misbirth11', 'name': u'Самопроизвольный выкидыш до 11 недель'},
+        #         {'code': 'misbirth21', 'name': u'Самопроизвольный выкидыш 12-21 недель'},
+        #         {'code': 'misbirth', 'name': u'Неуточненный выкидыш'},
+        #         {'code': 'belated_birth', 'name': u'Запоздалые роды'}]
+        # for document in data:
+        #     try:
+        #         result = obj.add_document(document)
+        #     except AttributeError, e:
+        #         logger.error(
+        #             self.msg.append(u'Ошибка импорта документа ({0}): {1}'.format(self.__doc_info(document), e)),
+        #             extra=dict(tags=['lpu', 'import error']))
+        #         return False
+        # self.msg.append(u'Справочник ({0}) обновлён'.format(code))
+        # logger.debug(u'\n'.join(self.msg), extra=dict(tags=['risar', 'import']))
 
-        code = 'rbRisarPreviousPregnancy'
-        name = u'Информация о предыдущих беременностях'
+        code = 'rbRisarBloodTransfusionType'
+        name = u'Наименование компонента крови'
         local_dictionary = self.__get_local_dictionary(code)
         if clear:
             self.__clear_data(code)
         if not local_dictionary:
             self.__add_dictionary(code, name)
         obj = Dictionary(code)
-        data = [{'code': 'normal', 'name': u'Роды в срок'},
-                {'code': 'miscarriage37', 'name': u'Преждеверменные роды 28-37 недель'},
-                {'code': 'miscarriage27', 'name': u'Преждеверменные роды 22-27 недель'},
-                {'code': 'med_abortion12', 'name': u'Медицинский аборт до 12 недель'},
-                {'code': 'med_abortion', 'name': u'Аборт по мед. показаниям'},
-                {'code': 'misbirth11', 'name': u'Самопроизвольный выкидыш до 11 недель'},
-                {'code': 'misbirth21', 'name': u'Самопроизвольный выкидыш 12-21 недель'},
-                {'code': 'misbirth', 'name': u'Неуточненный выкидыш'},
-                {'code': 'belated_birth', 'name': u'Запоздалые роды'}]
+        data = [{'code': '1', 'name': u'Концентрат тромбоцитов, полученный на аппарате MCS3p (донор)'},
+                {'code': '2', 'name': u'Концентрат тромбоцитов, полученный на аппарате MCS3p (родств)'},
+                {'code': '3', 'name': u'Криопреципитат'},
+                {'code': '4', 'name': u'Кровь консервированная'},
+                {'code': '5', 'name': u'Кровь цельная'},
+                {'code': '6', 'name': u'Лейкоцитная масса'},
+                {'code': '7', 'name': u'Плазма антисинегнойная'},
+                {'code': '8', 'name': u'Плазма антистафилококковая'},
+                {'code': '9', 'name': u'Плазма аферезная'},
+                {'code': '10', 'name': u'Плазма криосупернатантная'},
+                {'code': '11', 'name': u'Плазма свежезамороженная'},
+                {'code': '12', 'name': u'Плазма свежезамороженная обедненная лейкоцитами (фильтрованная)'},
+                {'code': '13', 'name': u'Полиглюкин 33%'},
+                {'code': '14', 'name': u'проба'},
+                {'code': '15', 'name': u'Тромбоконцентрат 4-х кратный'},
+                {'code': '16', 'name': u'Тромбоконцентрат 4-х кратный (родств)'},
+                {'code': '17', 'name': u'Тромбоконцентрат из дозы крови'},
+                {'code': '18', 'name': u'Цоликлоны анти-А для определения группы крови'},
+                {'code': '19', 'name': u'Цоликлоны анти-АВ для определения группы крови'},
+                {'code': '20', 'name': u'Цоликлоны анти-В для определения группы крови'},
+                {'code': '21', 'name': u'Цоликлоны анти-Д супер для определения резус-принадлежности крови'},
+                {'code': '22', 'name': u'Эритромасса Rh-отрицательная'},
+                {'code': '23', 'name': u'Эритромасса Rh-отрицательная, обедненная лейкоцитами (фильтрованная)'},
+                {'code': '24', 'name': u'Эритромасса Rh-положительная'},
+                {'code': '25', 'name': u'Эритромасса Rh-положительная, обедненная лейкоцитами (фильтрованная)'},
+                {'code': '26', 'name': u'Эритроцитная взвесь с SAGM Rh-отрицательная'},
+                {'code': '27', 'name': u'Эритроцитная взвесь с SAGM Rh-положительная'}
+                ]
         for document in data:
             try:
                 result = obj.add_document(document)
