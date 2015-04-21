@@ -1,9 +1,9 @@
 Flask
-PyMongo
+PyMongo==2.8
 requests
 simplejson
 suds
-sqlalchemy
+sqlalchemy==0.9.9
 Flask-Cache
 mysql-python
 -e git+https://github.com/KorusConsulting/pysimplelogs.git#egg=pysimplelogs
