@@ -2,7 +2,7 @@
 import os
 import sys
 from pymongo import TEXT, ASCENDING
-sys.path.insert(0, os.path.dirname('..'))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname( __file__), '..')))
 
 from app.lib.nsi.data import NSI_Data, kladr_set_parents
 
