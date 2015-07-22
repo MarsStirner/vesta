@@ -42,13 +42,31 @@ def search_type(field=None, value=None):
     if field and value:
         find = {field: prepare_find_params(value)}
     try:
-        classes = obj.get_list(find)
+        types = obj.get_list(find)
     except ValueError, e:
         raise InvalidAPIUsage(e.message, status_code=404)
     except AttributeError, e:
         raise InvalidAPIUsage(e.message, status_code=400)
     else:
-        result = _set_fields(classes)
+        result = _set_fields(types)
+    return jsonify(data=list(result))
+
+
+@module.route('/v1/{0}/'.format(FIELD_CODE), methods=['GET'])
+@module.route('/v1/{0}/<field>/<value>/'.format(FIELD_CODE), methods=['GET'])
+@crossdomain('*', methods=['GET'])
+@cache.memoize(86400)
+def search_fields(field=None, value=None):
+    obj = Dictionary(FIELD_CODE)
+    find = None
+    if field and value:
+        find = {field: prepare_find_params(value)}
+    try:
+        result = obj.get_list(find)
+    except ValueError, e:
+        raise InvalidAPIUsage(e.message, status_code=404)
+    except AttributeError, e:
+        raise InvalidAPIUsage(e.message, status_code=400)
     return jsonify(data=list(result))
 
 
