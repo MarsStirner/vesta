@@ -1,1 +1,1 @@
-__all__ = ['clients', 'dict_names', 'dictionary', 'kladr', 'hs', 'nsi']
+__all__ = ['clients', 'dict_names', 'dictionary', 'kladr', 'hs', 'nsi', 'zhpd']
