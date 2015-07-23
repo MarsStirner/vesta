@@ -74,9 +74,7 @@ def _set_types(classes):
     result = []
     obj = Dictionary(TYPE_CODE)
     for _class in classes:
-        _class['types'] = []
-        for _type in obj.get_list({'class_code': _class['code']}):
-            _class['types'].append(_set_fields([_type]))
+        _class['types'] = _set_fields(obj.get_list({'class_code': _class['code']}))
         result.append(_class)
     return result
 
