@@ -1,11 +1,12 @@
 # -*- encoding: utf-8 -*-
+import logging
 import re
 import datetime
 from datetime import timedelta
 from functools import update_wrapper
 from bson.objectid import ObjectId
 from flask import Response, make_response, request, current_app, g
-from pysimplelogs.logger import SimpleLogger
+from pysimplelogs2 import SimplelogHandler
 from config import SIMPLELOGS_URL, DEBUG, MODULE_NAME
 from version import version
 
@@ -90,10 +91,10 @@ def crossdomain(origin=None, methods=None, headers=None,
     return decorator
 
 
-logger = SimpleLogger.get_logger(SIMPLELOGS_URL,
-                                 MODULE_NAME,
-                                 dict(name=MODULE_NAME, version=version),
-                                 DEBUG)
+logger = logging.getLogger(MODULE_NAME)
+handler = SimplelogHandler()
+handler.set_url(SIMPLELOGS_URL)
+handler.owner = dict(name=MODULE_NAME, version=version)
 
 
 def parse_request(_request):
